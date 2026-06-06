@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "sub-agent-git",
+  "projectType": "library",
+  "sourceRoot": "packages/sub-agents/git/src",
+  "tags": ["scope:sub-agent"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/sub-agents/git",
+        "command": "tsc -p tsconfig.json"
+      }
+    }
+  }
+}

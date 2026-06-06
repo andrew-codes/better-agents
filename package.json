@@ -4,7 +4,7 @@
   "packageManager": "yarn@4.16.0",
   "workspaces": [
     "agents/*",
-    "packages/*"
+    "packages/**"
   ],
   "scripts": {
     "build": "nx run-many -t build",
@@ -13,7 +13,9 @@
     "typecheck": "nx run-many -t typecheck"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "nx": "latest",
+    "tsx": "^4.0.0",
     "typescript": "latest"
   }
 }

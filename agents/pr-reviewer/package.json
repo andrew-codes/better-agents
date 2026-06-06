@@ -1,0 +1,26 @@
+{
+  "name": "@andrew-codes/better-agents-pr-reviewer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "pr-reviewer": "./index.js"
+  },
+  "main": "./index.js",
+  "dependencies": {
+    "@andrew-codes/better-agents-pkg-config": "workspace:*",
+    "@andrew-codes/better-agents-pkg-model": "workspace:*",
+    "@andrew-codes/better-agents-pkg-sub-agent-git": "workspace:*",
+    "@andrew-codes/better-agents-pkg-sub-agent-pr-identification": "workspace:*",
+    "@langchain/core": "^1.0.0",
+    "@langchain/langgraph": "^1.2.0",
+    "@zed-industries/agent-client-protocol": "^0.4.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@rspack/cli": "^1.0.0",
+    "@rspack/core": "^1.0.0",
+    "@types/node": "^22.0.0",
+    "typescript": "latest"
+  }
+}

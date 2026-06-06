@@ -1,6 +1,6 @@
 # Agent packages
 
-Top-level agents live in `agents/<agent-name>/`. They are the user-facing entrypoints consumed via ACP using `@agentclientprotocol/sdk`.
+Top-level agents live in `agents/<agent-name>/`. They are the user-facing entrypoints consumed via ACP using `@zed-industries/agent-client-protocol`.
 
 ## Rules
 
@@ -9,9 +9,9 @@ Top-level agents live in `agents/<agent-name>/`. They are the user-facing entryp
 
 ## Dependencies
 
-- Use `@langgraph/sdk` (LangGraph TS SDK) to define agent graphs.
-- Use `@agentclientprotocol/sdk` for ACP exposure.
-- Local sub-agent packages (prefixed `@andrew-codes/better-agents-pkg-sub-agent-`) are listed as regular `dependencies` — they get bundled at build time and stripped from the distributed `package.json`.
+- Use `@langchain/langgraph` (LangGraph TS SDK) to define agent graphs.
+- Use `@zed-industries/agent-client-protocol` for ACP exposure.
+- Local workspace packages prefixed `@andrew-codes/better-agents-pkg-` (sub-agents and shared libs) are listed as regular `dependencies` — they get bundled at build time and stripped from the distributed `package.json`.
 
 ## System prompts
 

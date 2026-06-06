@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "lib-model",
+  "projectType": "library",
+  "sourceRoot": "packages/lib/model/src",
+  "tags": ["scope:lib"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/lib/model",
+        "command": "tsc -p tsconfig.json"
+      }
+    }
+  }
+}

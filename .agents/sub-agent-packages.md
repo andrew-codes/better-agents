@@ -16,4 +16,4 @@ Sub-agents are reusable LangGraph agents shared across one or more top-level age
 
 ## Usage
 
-A top-level agent lists sub-agents as `dependencies`. Rspack recognizes the `@andrew-codes/better-agents-pkg-sub-agent-` prefix and bundles them inline. The distributed `package.json` for the top-level agent omits these dependencies since they are already bundled.
+A top-level agent lists sub-agents as `dependencies`. Rspack recognizes the broader `@andrew-codes/better-agents-pkg-` prefix (which covers sub-agents and [shared libs](lib-packages.md)) and bundles them inline. The distributed `package.json` for the top-level agent omits these dependencies since they are already bundled.

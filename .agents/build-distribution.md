@@ -6,7 +6,7 @@ Top-level agent packages go through two phases: **build** then **package**.
 
 - Tool: **Rspack**
 - Output: `.build/` directory inside the agent package root (git-ignored)
-- Bundles all `@andrew-codes/better-agents-pkg-sub-agent-*` dependencies inline
+- Bundles all `@andrew-codes/better-agents-pkg-*` dependencies inline (sub-agents and shared libs)
 - Produces JS runnable by modern Node.js
 
 ## Package phase
@@ -15,7 +15,9 @@ Top-level agent packages go through two phases: **build** then **package**.
 - Copies all `.build/` artifacts into `.dist/`
 - Copies `package.json` into `.dist/` with these modifications:
   - Remove all `devDependencies`
-  - Remove all `dependencies` whose name starts with `@andrew-codes/better-agents-pkg-sub-agent-` (already bundled)
+  - Remove all `dependencies` whose name starts with `@andrew-codes/better-agents-pkg-` (already bundled)
+
+The package phase is implemented by `tools/package-agent.ts` (run via `tsx`).
 
 ## Nx integration
 

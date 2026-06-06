@@ -1,0 +1,18 @@
+{
+  "name": "@andrew-codes/better-agents-pkg-model",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@langchain/anthropic": "^1.0.0",
+    "@langchain/core": "^1.0.0",
+    "@langchain/openai": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "latest"
+  }
+}
