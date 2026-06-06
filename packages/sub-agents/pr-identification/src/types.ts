@@ -1,24 +1,24 @@
 import { z } from "zod";
 
 /** Supported git hosting providers. */
-export type GitProvider = "github" | "bitbucket";
+type GitProvider = "github" | "bitbucket";
 
 /** Resolved configuration for the GitHub provider. */
-export interface GitHubProviderConfig {
+interface GitHubProviderConfig {
   type: "github";
   /** Personal access token (from config.yml or the GITHUB_TOKEN env var). */
   token: string;
 }
 
 /** Resolved configuration for the Bitbucket provider. */
-export interface BitbucketProviderConfig {
+interface BitbucketProviderConfig {
   type: "bitbucket";
   username: string;
   workspace: string;
   token: string;
 }
 
-export type ProviderConfig = GitHubProviderConfig | BitbucketProviderConfig;
+type ProviderConfig = GitHubProviderConfig | BitbucketProviderConfig;
 
 /**
  * Details about an identified pull request.
@@ -27,7 +27,7 @@ export type ProviderConfig = GitHubProviderConfig | BitbucketProviderConfig;
  * locally by the top-level agent via `git diff`, never fetched from the
  * provider.
  */
-export const prDetailsSchema = z.object({
+const prDetailsSchema = z.object({
   provider: z.enum(["github", "bitbucket"]),
   /** Numeric PR number (GitHub) or id (Bitbucket). */
   number: z.number().int(),
@@ -41,4 +41,13 @@ export const prDetailsSchema = z.object({
   description: z.string().default(""),
 });
 
-export type PrDetails = z.infer<typeof prDetailsSchema>;
+type PrDetails = z.infer<typeof prDetailsSchema>;
+
+export type {
+  BitbucketProviderConfig,
+  GitHubProviderConfig,
+  GitProvider,
+  PrDetails,
+  ProviderConfig,
+};
+export { prDetailsSchema };

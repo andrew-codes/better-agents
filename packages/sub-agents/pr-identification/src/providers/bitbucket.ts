@@ -10,7 +10,7 @@ import type { ProviderMcp } from "./types.js";
  *
  * Only read-only PR and repository lookup tools are allowlisted.
  */
-export function bitbucketMcp(config: BitbucketProviderConfig): ProviderMcp {
+function bitbucketMcp(config: BitbucketProviderConfig): ProviderMcp {
   return {
     name: "bitbucket",
     command: "npx",
@@ -23,3 +23,5 @@ export function bitbucketMcp(config: BitbucketProviderConfig): ProviderMcp {
     allowedTools: ["getPullRequests", "getPullRequest", "getRepository"],
   };
 }
+
+export { bitbucketMcp };

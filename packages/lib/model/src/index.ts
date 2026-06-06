@@ -3,13 +3,13 @@ import type { BaseChatModel } from "@langchain/core/language_models/chat_models"
 import { ChatOpenAI } from "@langchain/openai";
 
 /** A model selection: a name plus arbitrary provider-specific options. */
-export interface ModelConfig {
+interface ModelConfig {
   name: string;
   [option: string]: unknown;
 }
 
 /** The default model used by sub-agents when no override is configured. */
-export const DEFAULT_MODEL_NAME = "haiku-4.5";
+const DEFAULT_MODEL_NAME = "haiku-4.5";
 
 /** Friendly model names mapped to concrete Anthropic model ids. */
 const ANTHROPIC_ALIASES: Record<string, string> = {
@@ -27,7 +27,7 @@ function isOpenAi(name: string): boolean {
  * Anthropic (default) and OpenAI. Extra keys under `model` are forwarded as
  * provider-specific options. Returns `undefined` when no model name is given.
  */
-export function resolveModel(config: ModelConfig | undefined): BaseChatModel | undefined {
+function resolveModel(config: ModelConfig | undefined): BaseChatModel | undefined {
   if (!config?.name) return undefined;
 
   const { name, ...options } = config;
@@ -44,9 +44,12 @@ export function resolveModel(config: ModelConfig | undefined): BaseChatModel | u
  * Resolve a model, falling back to a default model name when `config` is
  * absent. Always returns a usable chat model.
  */
-export function resolveModelOrDefault(
+function resolveModelOrDefault(
   config: ModelConfig | undefined,
   fallbackName: string = DEFAULT_MODEL_NAME,
 ): BaseChatModel {
   return resolveModel(config) ?? resolveModel({ name: fallbackName })!;
 }
+
+export type { ModelConfig };
+export { DEFAULT_MODEL_NAME, resolveModel, resolveModelOrDefault };

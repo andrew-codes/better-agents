@@ -1,5 +1,5 @@
 /** A stdio MCP server spec plus the read-only tools we expose from it. */
-export interface ProviderMcp {
+interface ProviderMcp {
   /** Logical server name used as the MCP namespace. */
   name: string;
   command: string;
@@ -12,3 +12,5 @@ export interface ProviderMcp {
    */
   allowedTools: string[];
 }
+
+export type { ProviderMcp };

@@ -10,7 +10,7 @@ import {
 import { resolveModel } from "@andrew-codes/better-agents-pkg-model";
 import type { PrReviewerConfig } from "./config/schema.js";
 
-export interface ReviewResult {
+interface ReviewResult {
   branch: string;
   pr: PrDetails | null;
   /** Local unified diff produced by `git diff` (never fetched from the host). */
@@ -56,7 +56,7 @@ const ReviewState = Annotation.Root({
   baseRef: Annotation<string>,
 });
 
-export interface PrReviewer {
+interface PrReviewer {
   /** Run the workflow against the current branch and return the gathered context. */
   review(): Promise<ReviewResult>;
   /** Tear down sub-agent resources (MCP subprocesses). */
@@ -72,7 +72,7 @@ export interface PrReviewer {
  * The PR's code diff is always produced locally via the git sub-agent — the
  * pr-identification sub-agent only returns PR metadata.
  */
-export async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
+async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
   // The repository is always the current working directory.
   const gitSubAgent = createGitSubAgent({
     model: resolveModel(config.config?.subAgents?.git?.model),
@@ -87,7 +87,10 @@ export async function createPrReviewer(config: PrReviewerConfig): Promise<PrRevi
   const detectBranch = async () => {
     const res = await gitSubAgent.invoke({
       messages: [
-        { role: "user", content: "Determine the current git branch using your tools and report only its name." },
+        {
+          role: "user",
+          content: "Determine the current git branch using your tools and report only its name.",
+        },
       ],
     });
     const branch = (toolOutput(res, "git_current_branch") ?? "").trim();
@@ -105,7 +108,11 @@ export async function createPrReviewer(config: PrReviewerConfig): Promise<PrRevi
     if (!base) {
       const detect = await gitSubAgent.invoke({
         messages: [
-          { role: "user", content: "Determine the repository's default branch using your tools and report only its name." },
+          {
+            role: "user",
+            content:
+              "Determine the repository's default branch using your tools and report only its name.",
+          },
         ],
       });
       base = (toolOutput(detect, "git_default_branch") ?? "").trim() || "main";
@@ -147,3 +154,6 @@ export async function createPrReviewer(config: PrReviewerConfig): Promise<PrRevi
     },
   };
 }
+
+export type { PrReviewer, ReviewResult };
+export { createPrReviewer };

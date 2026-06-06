@@ -2,10 +2,7 @@ import type { BaseChatModel } from "@langchain/core/language_models/chat_models"
 import type { StructuredToolInterface } from "@langchain/core/tools";
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
-import {
-  DEFAULT_MODEL_NAME,
-  resolveModelOrDefault,
-} from "@andrew-codes/better-agents-pkg-model";
+import { DEFAULT_MODEL_NAME, resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
 import { bitbucketMcp } from "./providers/bitbucket.js";
 import { githubMcp } from "./providers/github.js";
 import type { ProviderMcp } from "./providers/types.js";
@@ -13,9 +10,9 @@ import systemPrompt from "./prompt.md";
 import { prDetailsSchema, type PrDetails, type ProviderConfig } from "./types.js";
 
 /** Default model name for the PR-identification sub-agent. Overridable via config. */
-export const DEFAULT_MODEL = DEFAULT_MODEL_NAME;
+const DEFAULT_MODEL = DEFAULT_MODEL_NAME;
 
-export interface PrIdentificationOptions {
+interface PrIdentificationOptions {
   /** Resolved provider configuration (github or bitbucket). */
   provider: ProviderConfig;
   /**
@@ -25,7 +22,7 @@ export interface PrIdentificationOptions {
   model?: BaseChatModel;
 }
 
-export interface PrIdentificationSubAgent {
+interface PrIdentificationSubAgent {
   /**
    * Identify the open PR whose source branch matches `branch` and return its
    * details. The code diff is never fetched here — it is computed locally by
@@ -55,7 +52,7 @@ function scopeTools(
  * MCP server (scoped to read-only PR/repo metadata) with an empty system
  * prompt. Construction is async because MCP tools are loaded over the wire.
  */
-export async function createPrIdentificationSubAgent(
+async function createPrIdentificationSubAgent(
   options: PrIdentificationOptions,
 ): Promise<PrIdentificationSubAgent> {
   const mcp = providerMcp(options.provider);
@@ -100,8 +97,7 @@ export async function createPrIdentificationSubAgent(
         messages: [{ role: "user", content: task }],
       });
 
-      const structured = (result as { structuredResponse?: PrDetails })
-        .structuredResponse;
+      const structured = (result as { structuredResponse?: PrDetails }).structuredResponse;
       return structured ?? null;
     },
     async close() {
@@ -109,3 +105,6 @@ export async function createPrIdentificationSubAgent(
     },
   };
 }
+
+export type { PrIdentificationOptions, PrIdentificationSubAgent };
+export { DEFAULT_MODEL, createPrIdentificationSubAgent };

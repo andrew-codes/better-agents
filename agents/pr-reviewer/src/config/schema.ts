@@ -2,7 +2,7 @@ import type { ModelConfig } from "@andrew-codes/better-agents-pkg-model";
 import type { GitProvider } from "@andrew-codes/better-agents-pkg-sub-agent-pr-identification";
 
 /** Per-sub-agent overrides under `config.subAgents`. */
-export interface SubAgentsConfig {
+interface SubAgentsConfig {
   git?: {
     model?: ModelConfig;
   };
@@ -23,13 +23,15 @@ export interface SubAgentsConfig {
 }
 
 /** Agent-specific config under the `config` key for `pr-reviewer`. */
-export interface PrReviewerAgentConfig {
+interface PrReviewerAgentConfig {
   subAgents?: SubAgentsConfig;
 }
 
 /** The full `pr-reviewer` entry parsed from the central config.yml. */
-export interface PrReviewerConfig {
+interface PrReviewerConfig {
   model?: ModelConfig;
   env?: Record<string, string>;
   config?: PrReviewerAgentConfig;
 }
+
+export type { PrReviewerAgentConfig, PrReviewerConfig, SubAgentsConfig };

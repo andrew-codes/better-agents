@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
 
 /** Default location of the shared config per the agent-configuration conventions. */
-export function defaultConfigPath(): string {
+function defaultConfigPath(): string {
   return join(homedir(), ".config", "better-agents", "config.yml");
 }
 
@@ -12,7 +12,7 @@ export function defaultConfigPath(): string {
  * Recursively expand `${VAR}` / `$VAR` references in string values using the
  * supplied environment (bash-style substitution). Unset variables expand to "".
  */
-export function expandEnv<T>(value: T, env: NodeJS.ProcessEnv = process.env): T {
+function expandEnv<T>(value: T, env: NodeJS.ProcessEnv = process.env): T {
   if (typeof value === "string") {
     return value.replace(/\$\{(\w+)\}|\$(\w+)/g, (_, braced, bare) => {
       const name = braced ?? bare;
@@ -50,7 +50,7 @@ function findAgentEntry<T extends object>(doc: unknown, agentName: string): T {
   return {} as T;
 }
 
-export interface LoadAgentConfigOptions {
+interface LoadAgentConfigOptions {
   /** Path to the config file. Defaults to {@link defaultConfigPath}. */
   path?: string;
   /** Environment used for `${VAR}` expansion. Defaults to `process.env`. */
@@ -62,7 +62,7 @@ export interface LoadAgentConfigOptions {
  * `${VAR}` references. A missing file yields an empty config (all defaults
  * apply). Callers supply the agent-specific config shape as `T`.
  */
-export async function loadAgentConfig<T extends object>(
+async function loadAgentConfig<T extends object>(
   agentName: string,
   options: LoadAgentConfigOptions = {},
 ): Promise<T> {
@@ -84,10 +84,13 @@ export async function loadAgentConfig<T extends object>(
  * Inject an agent-level `env` block into `process.env` so child processes
  * (e.g. MCP servers) inherit it. Existing values are not overwritten.
  */
-export function applyEnv(env: Record<string, string> | undefined): void {
+function applyEnv(env: Record<string, string> | undefined): void {
   for (const [key, value] of Object.entries(env ?? {})) {
     if (process.env[key] === undefined && value) {
       process.env[key] = value;
     }
   }
 }
+
+export type { LoadAgentConfigOptions };
+export { applyEnv, defaultConfigPath, expandEnv, loadAgentConfig };

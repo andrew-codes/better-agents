@@ -11,7 +11,7 @@ import type { ProviderMcp } from "./types.js";
  * Only read-only PR and repository metadata tools are allowlisted. Tools that
  * would return file contents or diffs are intentionally omitted.
  */
-export function githubMcp(config: GitHubProviderConfig): ProviderMcp {
+function githubMcp(config: GitHubProviderConfig): ProviderMcp {
   return {
     name: "github",
     command: "npx",
@@ -19,10 +19,8 @@ export function githubMcp(config: GitHubProviderConfig): ProviderMcp {
     env: {
       GITHUB_PERSONAL_ACCESS_TOKEN: config.token,
     },
-    allowedTools: [
-      "list_pull_requests",
-      "get_pull_request",
-      "search_repositories",
-    ],
+    allowedTools: ["list_pull_requests", "get_pull_request", "search_repositories"],
   };
 }
+
+export { githubMcp };

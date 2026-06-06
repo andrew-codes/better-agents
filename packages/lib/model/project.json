@@ -5,6 +5,12 @@
   "sourceRoot": "packages/lib/model/src",
   "tags": ["scope:lib"],
   "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint packages/lib/model/src"
+      }
+    },
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {

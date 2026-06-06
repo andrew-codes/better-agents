@@ -1,7 +1,4 @@
-export {
-  createPrIdentificationSubAgent,
-  DEFAULT_MODEL,
-} from "./pr-identification-sub-agent.js";
+export { createPrIdentificationSubAgent, DEFAULT_MODEL } from "./pr-identification-sub-agent.js";
 export type {
   PrIdentificationOptions,
   PrIdentificationSubAgent,

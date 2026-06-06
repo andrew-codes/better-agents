@@ -14,8 +14,13 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^10.0.0",
+    "eslint-plugin-import-x": "^4.0.0",
     "nx": "latest",
+    "prettier": "^3.0.0",
     "tsx": "^4.0.0",
-    "typescript": "latest"
+    "typescript": "latest",
+    "typescript-eslint": "^8.0.0"
   }
 }

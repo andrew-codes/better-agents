@@ -2,18 +2,15 @@ import type { BaseChatModel } from "@langchain/core/language_models/chat_models"
 import type { BaseMessage, BaseMessageLike } from "@langchain/core/messages";
 import type { RunnableConfig } from "@langchain/core/runnables";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
-import {
-  DEFAULT_MODEL_NAME,
-  resolveModelOrDefault,
-} from "@andrew-codes/better-agents-pkg-model";
+import { DEFAULT_MODEL_NAME, resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
 import type { GitContext } from "./git.js";
 import systemPrompt from "./prompt.md";
 import { createGitTools } from "./tools.js";
 
 /** Default model name for the git sub-agent. Overridable via the central config. */
-export const DEFAULT_MODEL = DEFAULT_MODEL_NAME;
+const DEFAULT_MODEL = DEFAULT_MODEL_NAME;
 
-export interface GitSubAgentOptions {
+interface GitSubAgentOptions {
   /**
    * Chat model to drive the sub-agent. When omitted, the default model
    * (Haiku 4.5) is constructed. The top-level agent passes an override
@@ -25,7 +22,7 @@ export interface GitSubAgentOptions {
 }
 
 /** Minimal invokable surface of the git sub-agent used by callers. */
-export interface GitSubAgent {
+interface GitSubAgent {
   invoke(
     input: { messages: BaseMessageLike[] },
     config?: RunnableConfig,
@@ -37,7 +34,7 @@ export interface GitSubAgent {
  * tools and an empty system prompt (behaviour is driven entirely by the
  * task message the orchestrator sends).
  */
-export function createGitSubAgent(options: GitSubAgentOptions = {}): GitSubAgent {
+function createGitSubAgent(options: GitSubAgentOptions = {}): GitSubAgent {
   const model = options.model ?? resolveModelOrDefault(undefined);
 
   return createReactAgent({
@@ -47,3 +44,6 @@ export function createGitSubAgent(options: GitSubAgentOptions = {}): GitSubAgent
     prompt: systemPrompt || undefined,
   });
 }
+
+export type { GitSubAgent, GitSubAgentOptions };
+export { DEFAULT_MODEL, createGitSubAgent };

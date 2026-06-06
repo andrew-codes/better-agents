@@ -5,6 +5,12 @@
   "sourceRoot": "packages/sub-agents/pr-identification/src",
   "tags": ["scope:sub-agent"],
   "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint packages/sub-agents/pr-identification/src"
+      }
+    },
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {

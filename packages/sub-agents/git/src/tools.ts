@@ -1,19 +1,13 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
-import {
-  currentBranch,
-  defaultBranch,
-  mergeBase,
-  runGit,
-  type GitContext,
-} from "./git.js";
+import { currentBranch, defaultBranch, mergeBase, runGit, type GitContext } from "./git.js";
 
 /**
  * Build the set of read-oriented git tools the sub-agent is allowed to use.
  * Each tool maps to a single git subcommand invoked with array-form args, so
  * there is no shell and no arbitrary-command surface.
  */
-export function createGitTools(ctx: GitContext = {}) {
+function createGitTools(ctx: GitContext = {}) {
   const gitCurrentBranch = tool(async () => currentBranch(ctx), {
     name: "git_current_branch",
     description: "Return the name of the currently checked-out git branch.",
@@ -80,17 +74,16 @@ export function createGitTools(ctx: GitContext = {}) {
     },
   );
 
-  const gitMergeBase = tool(
-    async ({ ref, base }) => mergeBase(ref, base, ctx),
-    {
-      name: "git_merge_base",
-      description: "Return the best common ancestor commit of `ref` and `base`.",
-      schema: z.object({
-        ref: z.string().describe("Typically the PR/topic branch or HEAD."),
-        base: z.string().describe("Typically the target branch, e.g. 'origin/main'."),
-      }),
-    },
-  );
+  const gitMergeBase = tool(async ({ ref, base }) => mergeBase(ref, base, ctx), {
+    name: "git_merge_base",
+    description: "Return the best common ancestor commit of `ref` and `base`.",
+    schema: z.object({
+      ref: z.string().describe("Typically the PR/topic branch or HEAD."),
+      base: z.string().describe("Typically the target branch, e.g. 'origin/main'."),
+    }),
+  });
 
   return [gitCurrentBranch, gitDefaultBranch, gitStatus, gitDiff, gitLog, gitMergeBase];
 }
+
+export { createGitTools };
