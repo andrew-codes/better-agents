@@ -9,7 +9,7 @@ interface ModelConfig {
 }
 
 /** The default model used by sub-agents when no override is configured. */
-const DEFAULT_MODEL_NAME = "haiku-4.5";
+const DEFAULT_MODEL_NAME = "sonnet-4.6";
 
 /** Friendly model names mapped to concrete Anthropic model ids. */
 const ANTHROPIC_ALIASES: Record<string, string> = {
