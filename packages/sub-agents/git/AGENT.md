@@ -11,14 +11,14 @@ top-level agents that depend on it (no standalone build).
 
 ## Tools (read-oriented, no shell)
 
-| Tool | Purpose |
-|------|---------|
-| `git_current_branch` | Name of the checked-out branch |
+| Tool                 | Purpose                                                                           |
+| -------------------- | --------------------------------------------------------------------------------- |
+| `git_current_branch` | Name of the checked-out branch                                                    |
 | `git_default_branch` | Repo's default branch (from `origin/HEAD`, falling back to local `main`/`master`) |
-| `git_status` | Porcelain working-tree status |
-| `git_diff` | Unified diff (`base...head` range or working tree vs `base`) |
-| `git_log` | Commit log lines |
-| `git_merge_base` | Common ancestor of two refs |
+| `git_status`         | Porcelain working-tree status                                                     |
+| `git_diff`           | Unified diff (`base...head` range or working tree vs `base`)                      |
+| `git_log`            | Commit log lines                                                                  |
+| `git_merge_base`     | Common ancestor of two refs                                                       |
 
 All commands run via `execFile("git", [...args])` — array-form arguments, never
 a shell — so caller input cannot inject shell metacharacters.

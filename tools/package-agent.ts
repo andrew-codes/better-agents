@@ -52,10 +52,7 @@ async function packageAgent(projectRootArg: string): Promise<void> {
     }
   }
 
-  await writeFile(
-    join(distDir, "package.json"),
-    JSON.stringify(pkg, null, 2) + "\n",
-  );
+  await writeFile(join(distDir, "package.json"), JSON.stringify(pkg, null, 2) + "\n");
 
   console.log(`[package-agent] Packaged ${pkg.name} -> ${distDir}`);
 }

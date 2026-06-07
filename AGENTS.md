@@ -21,12 +21,12 @@ stripped from the distributed `package.json`.
 
 ## Commands
 
-| Task      | Command                    |
-|-----------|----------------------------|
+| Task      | Command                               |
+| --------- | ------------------------------------- |
 | Build all | `yarn build` / `nx run-many -t build` |
-| Test all  | `yarn test`                |
-| Typecheck | `yarn typecheck`           |
-| Lint      | `yarn lint`                |
+| Test all  | `yarn test`                           |
+| Typecheck | `yarn typecheck`                      |
+| Lint      | `yarn lint`                           |
 
 Run a single project: `nx run <project-name>:<target>` (e.g. `nx run pr-reviewer:build`).
 

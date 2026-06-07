@@ -1,0 +1,6 @@
+.yarn/
+.pnp.*
+.nx/
+.build/
+.dist/
+node_modules/

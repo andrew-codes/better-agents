@@ -12,8 +12,8 @@ All agents are configured at runtime via a shared YAML file located at:
 agents:
   - <agent-name>:
       model:
-        name: sonnet-4.6          # Claude or OpenAI model name
-        <modelOption>: <value>    # Provider-specific options (vary by provider)
+        name: sonnet-4.6 # Claude or OpenAI model name
+        <modelOption>: <value> # Provider-specific options (vary by provider)
       mcpServers:
         - name: <server-name>
           type: stdio
@@ -21,13 +21,13 @@ agents:
           args:
             - <arg>
           env:
-            ENV_VAR: ${ENV_VAR_VALUE}   # Bash-style variable substitution
+            ENV_VAR: ${ENV_VAR_VALUE} # Bash-style variable substitution
           tools:
-            - <tool-name>              # Optional allowlist; omit to expose all tools
+            - <tool-name> # Optional allowlist; omit to expose all tools
       config:
-        <key>: <value>               # Agent-specific options (vary by agent)
+        <key>: <value> # Agent-specific options (vary by agent)
       env:
-        ENV_VAR: ${ENV_VAR_VALUE}    # Bash-style variable substitution
+        ENV_VAR: ${ENV_VAR_VALUE} # Bash-style variable substitution
 ```
 
 ## Model support

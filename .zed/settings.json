@@ -3,12 +3,12 @@
     "vtsls": {
       "initialization_options": {
         "typescript": {
-          "tsdk": ".yarn/sdks/typescript/lib",
+          "tsdk": ".yarn/sdks/typescript/lib"
         },
         "vtsls": {
-          "autoUseWorkspaceTsdk": true,
-        },
-      },
-    },
-  },
+          "autoUseWorkspaceTsdk": true
+        }
+      }
+    }
+  }
 }

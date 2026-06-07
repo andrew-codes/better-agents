@@ -37,13 +37,13 @@ agents:
         subAgents:
           git:
             model:
-              name: haiku-4.5  # default model for the git sub-agent
+              name: haiku-4.5 # default model for the git sub-agent
           prIdentification:
             model:
-              name: haiku-4.5  # default model for the pr-identification sub-agent
+              name: haiku-4.5 # default model for the pr-identification sub-agent
             gitProvider: github # github | bitbucket
             github:
-              token: ${GITHUB_TOKEN}        # falls back to env GITHUB_TOKEN
+              token: ${GITHUB_TOKEN} # falls back to env GITHUB_TOKEN
             bitbucket:
               username: ${BITBUCKET_USERNAME}
               workspace: ${BITBUCKET_WORKSPACE}
