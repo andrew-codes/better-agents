@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "lib-plannotator",
+  "projectType": "library",
+  "sourceRoot": "packages/lib/plannotator/src",
+  "tags": ["scope:lib"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint packages/lib/plannotator/src"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/lib/plannotator",
+        "command": "tsc -p tsconfig.json"
+      }
+    }
+  }
+}

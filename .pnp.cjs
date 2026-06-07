@@ -43,6 +43,10 @@ const RAW_RUNTIME_STATE =
       "reference": "workspace:packages/lib/model"\
     },\
     {\
+      "name": "@andrew-codes/better-agents-pkg-plannotator",\
+      "reference": "workspace:packages/lib/plannotator"\
+    },\
+    {\
       "name": "@andrew-codes/better-agents-pkg-types-git-provider",\
       "reference": "workspace:packages/lib/types-git-provider"\
     },\
@@ -74,6 +78,7 @@ const RAW_RUNTIME_STATE =
     ["@andrew-codes/better-agents-pkg-mcp-github", ["workspace:packages/lib/mcp-github"]],\
     ["@andrew-codes/better-agents-pkg-mcp-utils", ["workspace:packages/lib/mcp-utils"]],\
     ["@andrew-codes/better-agents-pkg-model", ["workspace:packages/lib/model"]],\
+    ["@andrew-codes/better-agents-pkg-plannotator", ["workspace:packages/lib/plannotator"]],\
     ["@andrew-codes/better-agents-pkg-sub-agent-code-reviewer", ["workspace:packages/sub-agents/code-reviewer"]],\
     ["@andrew-codes/better-agents-pkg-sub-agent-git", ["workspace:packages/sub-agents/git"]],\
     ["@andrew-codes/better-agents-pkg-sub-agent-pr-identification", ["workspace:packages/sub-agents/pr-identification"]],\
@@ -193,6 +198,17 @@ const RAW_RUNTIME_STATE =
         "linkType": "SOFT"\
       }]\
     ]],\
+    ["@andrew-codes/better-agents-pkg-plannotator", [\
+      ["workspace:packages/lib/plannotator", {\
+        "packageLocation": "./packages/lib/plannotator/",\
+        "packageDependencies": [\
+          ["@andrew-codes/better-agents-pkg-plannotator", "workspace:packages/lib/plannotator"],\
+          ["@types/node", "npm:22.19.19"],\
+          ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"]\
+        ],\
+        "linkType": "SOFT"\
+      }]\
+    ]],\
     ["@andrew-codes/better-agents-pkg-sub-agent-code-reviewer", [\
       ["workspace:packages/sub-agents/code-reviewer", {\
         "packageLocation": "./packages/sub-agents/code-reviewer/",\
@@ -287,6 +303,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@andrew-codes/better-agents-pkg-config", "workspace:packages/lib/config"],\
           ["@andrew-codes/better-agents-pkg-model", "workspace:packages/lib/model"],\
+          ["@andrew-codes/better-agents-pkg-plannotator", "workspace:packages/lib/plannotator"],\
           ["@andrew-codes/better-agents-pkg-sub-agent-code-reviewer", "workspace:packages/sub-agents/code-reviewer"],\
           ["@andrew-codes/better-agents-pkg-sub-agent-git", "workspace:packages/sub-agents/git"],\
           ["@andrew-codes/better-agents-pkg-sub-agent-pr-identification", "workspace:packages/sub-agents/pr-identification"],\

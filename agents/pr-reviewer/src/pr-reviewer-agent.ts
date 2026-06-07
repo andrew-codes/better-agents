@@ -18,8 +18,8 @@ import {
   createFeedbackPublisherSubAgent,
   type FeedbackPublisherSubAgent,
 } from "@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher";
+import { annotate } from "@andrew-codes/better-agents-pkg-plannotator";
 import type { GitProviderCredentials, PrReviewerConfig } from "./config/schema.js";
-import { annotate } from "./plannotator.js";
 
 /** Guard against an endless annotate/revise loop if approval never comes. */
 const MAX_REVISION_ROUNDS = 10;

@@ -66,6 +66,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@andrew-codes/better-agents-pkg-plannotator@workspace:*, @andrew-codes/better-agents-pkg-plannotator@workspace:packages/lib/plannotator":
+  version: 0.0.0-use.local
+  resolution: "@andrew-codes/better-agents-pkg-plannotator@workspace:packages/lib/plannotator"
+  dependencies:
+    "@types/node": "npm:^22.0.0"
+    typescript: "npm:latest"
+  languageName: unknown
+  linkType: soft
+
 "@andrew-codes/better-agents-pkg-sub-agent-code-reviewer@workspace:*, @andrew-codes/better-agents-pkg-sub-agent-code-reviewer@workspace:packages/sub-agents/code-reviewer":
   version: 0.0.0-use.local
   resolution: "@andrew-codes/better-agents-pkg-sub-agent-code-reviewer@workspace:packages/sub-agents/code-reviewer"
@@ -150,6 +159,7 @@ __metadata:
   dependencies:
     "@andrew-codes/better-agents-pkg-config": "workspace:*"
     "@andrew-codes/better-agents-pkg-model": "workspace:*"
+    "@andrew-codes/better-agents-pkg-plannotator": "workspace:*"
     "@andrew-codes/better-agents-pkg-sub-agent-code-reviewer": "workspace:*"
     "@andrew-codes/better-agents-pkg-sub-agent-git": "workspace:*"
     "@andrew-codes/better-agents-pkg-sub-agent-pr-identification": "workspace:*"

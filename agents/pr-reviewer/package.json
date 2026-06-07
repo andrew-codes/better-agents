@@ -10,6 +10,7 @@
   "dependencies": {
     "@andrew-codes/better-agents-pkg-config": "workspace:*",
     "@andrew-codes/better-agents-pkg-model": "workspace:*",
+    "@andrew-codes/better-agents-pkg-plannotator": "workspace:*",
     "@andrew-codes/better-agents-pkg-sub-agent-code-reviewer": "workspace:*",
     "@andrew-codes/better-agents-pkg-sub-agent-git": "workspace:*",
     "@andrew-codes/better-agents-pkg-sub-agent-pr-identification": "workspace:*",
