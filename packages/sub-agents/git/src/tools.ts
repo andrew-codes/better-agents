@@ -21,12 +21,6 @@ function createGitTools(ctx: GitContext = {}) {
     schema: z.object({}),
   });
 
-  const gitStatus = tool(async () => runGit(["status", "--porcelain=v1", "--branch"], ctx), {
-    name: "git_status",
-    description: "Return the working-tree status in porcelain form.",
-    schema: z.object({}),
-  });
-
   const gitDiff = tool(
     async ({ base, head, paths }) => {
       const args = ["diff"];
@@ -83,7 +77,7 @@ function createGitTools(ctx: GitContext = {}) {
     }),
   });
 
-  return [gitCurrentBranch, gitDefaultBranch, gitStatus, gitDiff, gitLog, gitMergeBase];
+  return [gitCurrentBranch, gitDefaultBranch, gitDiff, gitLog, gitMergeBase];
 }
 
 export { createGitTools };

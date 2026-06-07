@@ -27,6 +27,10 @@ const RAW_RUNTIME_STATE =
       "reference": "workspace:packages/lib/mcp-bitbucket"\
     },\
     {\
+      "name": "@andrew-codes/better-agents-pkg-mcp-git",\
+      "reference": "workspace:packages/lib/mcp-git"\
+    },\
+    {\
       "name": "@andrew-codes/better-agents-pkg-mcp-github",\
       "reference": "workspace:packages/lib/mcp-github"\
     },\
@@ -66,6 +70,7 @@ const RAW_RUNTIME_STATE =
     ["@andrew-codes/better-agents", ["workspace:."]],\
     ["@andrew-codes/better-agents-pkg-config", ["workspace:packages/lib/config"]],\
     ["@andrew-codes/better-agents-pkg-mcp-bitbucket", ["workspace:packages/lib/mcp-bitbucket"]],\
+    ["@andrew-codes/better-agents-pkg-mcp-git", ["workspace:packages/lib/mcp-git"]],\
     ["@andrew-codes/better-agents-pkg-mcp-github", ["workspace:packages/lib/mcp-github"]],\
     ["@andrew-codes/better-agents-pkg-mcp-utils", ["workspace:packages/lib/mcp-utils"]],\
     ["@andrew-codes/better-agents-pkg-model", ["workspace:packages/lib/model"]],\
@@ -139,6 +144,18 @@ const RAW_RUNTIME_STATE =
         "linkType": "SOFT"\
       }]\
     ]],\
+    ["@andrew-codes/better-agents-pkg-mcp-git", [\
+      ["workspace:packages/lib/mcp-git", {\
+        "packageLocation": "./packages/lib/mcp-git/",\
+        "packageDependencies": [\
+          ["@andrew-codes/better-agents-pkg-mcp-git", "workspace:packages/lib/mcp-git"],\
+          ["@andrew-codes/better-agents-pkg-mcp-utils", "workspace:packages/lib/mcp-utils"],\
+          ["@types/node", "npm:22.19.19"],\
+          ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"]\
+        ],\
+        "linkType": "SOFT"\
+      }]\
+    ]],\
     ["@andrew-codes/better-agents-pkg-mcp-github", [\
       ["workspace:packages/lib/mcp-github", {\
         "packageLocation": "./packages/lib/mcp-github/",\
@@ -194,9 +211,13 @@ const RAW_RUNTIME_STATE =
       ["workspace:packages/sub-agents/git", {\
         "packageLocation": "./packages/sub-agents/git/",\
         "packageDependencies": [\
+          ["@andrew-codes/better-agents-pkg-mcp-git", "workspace:packages/lib/mcp-git"],\
+          ["@andrew-codes/better-agents-pkg-mcp-utils", "workspace:packages/lib/mcp-utils"],\
           ["@andrew-codes/better-agents-pkg-model", "workspace:packages/lib/model"],\
           ["@andrew-codes/better-agents-pkg-sub-agent-git", "workspace:packages/sub-agents/git"],\
           ["@langchain/core", "npm:1.1.48"],\
+          ["@langchain/langgraph", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5"],\
+          ["@langchain/mcp-adapters", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.1.3"],\
           ["@types/node", "npm:22.19.19"],\
           ["langchain", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.4.4"],\
           ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"],\
@@ -216,8 +237,8 @@ const RAW_RUNTIME_STATE =
           ["@andrew-codes/better-agents-pkg-sub-agent-pr-identification", "workspace:packages/sub-agents/pr-identification"],\
           ["@andrew-codes/better-agents-pkg-types-git-provider", "workspace:packages/lib/types-git-provider"],\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.3.5"],\
-          ["@langchain/mcp-adapters", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.1.3"],\
+          ["@langchain/langgraph", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5"],\
+          ["@langchain/mcp-adapters", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.1.3"],\
           ["@types/node", "npm:22.19.19"],\
           ["langchain", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.4.4"],\
           ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"],\
@@ -237,8 +258,8 @@ const RAW_RUNTIME_STATE =
           ["@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher", "workspace:packages/sub-agents/pr-review-feedback-publisher"],\
           ["@andrew-codes/better-agents-pkg-types-git-provider", "workspace:packages/lib/types-git-provider"],\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.3.5"],\
-          ["@langchain/mcp-adapters", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.1.3"],\
+          ["@langchain/langgraph", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5"],\
+          ["@langchain/mcp-adapters", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.1.3"],\
           ["@types/node", "npm:22.19.19"],\
           ["langchain", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.4.4"],\
           ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"],\
@@ -273,7 +294,7 @@ const RAW_RUNTIME_STATE =
           ["@andrew-codes/better-agents-pkg-types-git-provider", "workspace:packages/lib/types-git-provider"],\
           ["@andrew-codes/better-agents-pr-reviewer", "workspace:agents/pr-reviewer"],\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.3.5"],\
+          ["@langchain/langgraph", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5"],\
           ["@rspack/cli", "virtual:bc857d08081ef78eea5854008f1abce2ec8cc6c57ab2751b828ebc2bcb8a854505012e51f41919acdc17ea64ce195e0858343c579dc8d750682bc8e54f67678b#npm:1.7.11"],\
           ["@rspack/core", "virtual:bc857d08081ef78eea5854008f1abce2ec8cc6c57ab2751b828ebc2bcb8a854505012e51f41919acdc17ea64ce195e0858343c579dc8d750682bc8e54f67678b#npm:1.7.11"],\
           ["@types/node", "npm:22.19.19"],\
@@ -744,10 +765,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:cc28496614258f4c7ab35fdaecd583483196d864d711013793e930fb70733aeb1ae1f80c6bfcf1794ea6d66cea0a3fe3c65d7869dded13a439385127a0a563d8#npm:1.19.14", {\
-        "packageLocation": "./.yarn/__virtual__/@hono-node-server-virtual-25ab904781/0/cache/@hono-node-server-npm-1.19.14-48aa17238f-41a099bb37.zip/node_modules/@hono/node-server/",\
+      ["virtual:ef169ae23c86d0934fd3ac00a5b38597698c4ddd6ab035f9d0533a6d23f2c2e8ebbcb6381adc64254e1ed347943d8801cefde0b7870abbd709c939199688ca4f#npm:1.19.14", {\
+        "packageLocation": "./.yarn/__virtual__/@hono-node-server-virtual-365893db28/0/cache/@hono-node-server-npm-1.19.14-48aa17238f-41a099bb37.zip/node_modules/@hono/node-server/",\
         "packageDependencies": [\
-          ["@hono/node-server", "virtual:cc28496614258f4c7ab35fdaecd583483196d864d711013793e930fb70733aeb1ae1f80c6bfcf1794ea6d66cea0a3fe3c65d7869dded13a439385127a0a563d8#npm:1.19.14"],\
+          ["@hono/node-server", "virtual:ef169ae23c86d0934fd3ac00a5b38597698c4ddd6ab035f9d0533a6d23f2c2e8ebbcb6381adc64254e1ed347943d8801cefde0b7870abbd709c939199688ca4f#npm:1.19.14"],\
           ["@types/hono", null],\
           ["hono", "npm:4.12.23"]\
         ],\
@@ -1356,13 +1377,13 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.3.6", {\
-        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-virtual-08e3be0839/0/cache/@langchain-langgraph-npm-1.3.6-c285d7b0f1-8f7af992e3.zip/node_modules/@langchain/langgraph/",\
+      ["virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5", {\
+        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-virtual-4e97d12e70/0/cache/@langchain-langgraph-npm-1.3.5-9dbef6c6d7-e129798e37.zip/node_modules/@langchain/langgraph/",\
         "packageDependencies": [\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph", "virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.3.6"],\
-          ["@langchain/langgraph-checkpoint", "virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.0.4"],\
-          ["@langchain/langgraph-sdk", "virtual:08e3be0839b02ccd109be32aab8cebc2035044a0c00410e52e9bd9f53460e26c0f686cfa549801356d736fb557d199a4e26b14d87727a4265bac6ad966709313#npm:1.9.17"],\
+          ["@langchain/langgraph", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5"],\
+          ["@langchain/langgraph-checkpoint", "virtual:4e97d12e70d9db636b73a693190178a2afee35a642475b7265eea92c554d0c98b689b91784a3d1698d031a398ba5a1761ab80c98a4171a3f74dcfc8dd82dcad5#npm:1.0.4"],\
+          ["@langchain/langgraph-sdk", "virtual:4e97d12e70d9db636b73a693190178a2afee35a642475b7265eea92c554d0c98b689b91784a3d1698d031a398ba5a1761ab80c98a4171a3f74dcfc8dd82dcad5#npm:1.9.16"],\
           ["@langchain/protocol", "npm:0.0.16"],\
           ["@standard-schema/spec", "npm:1.1.0"],\
           ["@types/langchain__core", null],\
@@ -1382,13 +1403,13 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.3.5", {\
-        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-virtual-5f3122f0f3/0/cache/@langchain-langgraph-npm-1.3.5-9dbef6c6d7-e129798e37.zip/node_modules/@langchain/langgraph/",\
+      ["virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.3.6", {\
+        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-virtual-08e3be0839/0/cache/@langchain-langgraph-npm-1.3.6-c285d7b0f1-8f7af992e3.zip/node_modules/@langchain/langgraph/",\
         "packageDependencies": [\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.3.5"],\
-          ["@langchain/langgraph-checkpoint", "virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.0.4"],\
-          ["@langchain/langgraph-sdk", "virtual:5f3122f0f3c378fba1811f443e6d69a2c38782c708398f2c3a95dc6a5587fe7e47f8e2d3c2ade173f40cad88c0fb2a919a66b48e3d44aa2fe97c7bac1ca8f745#npm:1.9.16"],\
+          ["@langchain/langgraph", "virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.3.6"],\
+          ["@langchain/langgraph-checkpoint", "virtual:4e97d12e70d9db636b73a693190178a2afee35a642475b7265eea92c554d0c98b689b91784a3d1698d031a398ba5a1761ab80c98a4171a3f74dcfc8dd82dcad5#npm:1.0.4"],\
+          ["@langchain/langgraph-sdk", "virtual:08e3be0839b02ccd109be32aab8cebc2035044a0c00410e52e9bd9f53460e26c0f686cfa549801356d736fb557d199a4e26b14d87727a4265bac6ad966709313#npm:1.9.17"],\
           ["@langchain/protocol", "npm:0.0.16"],\
           ["@standard-schema/spec", "npm:1.1.0"],\
           ["@types/langchain__core", null],\
@@ -1417,11 +1438,11 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.0.4", {\
-        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-checkpoint-virtual-17be17de53/0/cache/@langchain-langgraph-checkpoint-npm-1.0.4-7874115d8e-83cd4a0461.zip/node_modules/@langchain/langgraph-checkpoint/",\
+      ["virtual:4e97d12e70d9db636b73a693190178a2afee35a642475b7265eea92c554d0c98b689b91784a3d1698d031a398ba5a1761ab80c98a4171a3f74dcfc8dd82dcad5#npm:1.0.4", {\
+        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-checkpoint-virtual-21a63ce950/0/cache/@langchain-langgraph-checkpoint-npm-1.0.4-7874115d8e-83cd4a0461.zip/node_modules/@langchain/langgraph-checkpoint/",\
         "packageDependencies": [\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph-checkpoint", "virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.0.4"],\
+          ["@langchain/langgraph-checkpoint", "virtual:4e97d12e70d9db636b73a693190178a2afee35a642475b7265eea92c554d0c98b689b91784a3d1698d031a398ba5a1761ab80c98a4171a3f74dcfc8dd82dcad5#npm:1.0.4"],\
           ["@types/langchain__core", null],\
           ["uuid", "npm:14.0.0"]\
         ],\
@@ -1481,11 +1502,11 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["virtual:5f3122f0f3c378fba1811f443e6d69a2c38782c708398f2c3a95dc6a5587fe7e47f8e2d3c2ade173f40cad88c0fb2a919a66b48e3d44aa2fe97c7bac1ca8f745#npm:1.9.16", {\
-        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-sdk-virtual-4ae9451711/0/cache/@langchain-langgraph-sdk-npm-1.9.16-009c1d0daf-7f9bb65deb.zip/node_modules/@langchain/langgraph-sdk/",\
+      ["virtual:4e97d12e70d9db636b73a693190178a2afee35a642475b7265eea92c554d0c98b689b91784a3d1698d031a398ba5a1761ab80c98a4171a3f74dcfc8dd82dcad5#npm:1.9.16", {\
+        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-sdk-virtual-d31d67b174/0/cache/@langchain-langgraph-sdk-npm-1.9.16-009c1d0daf-7f9bb65deb.zip/node_modules/@langchain/langgraph-sdk/",\
         "packageDependencies": [\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph-sdk", "virtual:5f3122f0f3c378fba1811f443e6d69a2c38782c708398f2c3a95dc6a5587fe7e47f8e2d3c2ade173f40cad88c0fb2a919a66b48e3d44aa2fe97c7bac1ca8f745#npm:1.9.16"],\
+          ["@langchain/langgraph-sdk", "virtual:4e97d12e70d9db636b73a693190178a2afee35a642475b7265eea92c554d0c98b689b91784a3d1698d031a398ba5a1761ab80c98a4171a3f74dcfc8dd82dcad5#npm:1.9.16"],\
           ["@langchain/protocol", "npm:0.0.16"],\
           ["@types/json-schema", "npm:7.0.15"],\
           ["@types/langchain__core", null],\
@@ -1524,13 +1545,13 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.1.3", {\
-        "packageLocation": "./.yarn/__virtual__/@langchain-mcp-adapters-virtual-8c22f172a8/0/cache/@langchain-mcp-adapters-npm-1.1.3-6d9d26fba9-804a18c173.zip/node_modules/@langchain/mcp-adapters/",\
+      ["virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.1.3", {\
+        "packageLocation": "./.yarn/__virtual__/@langchain-mcp-adapters-virtual-2352920f68/0/cache/@langchain-mcp-adapters-npm-1.1.3-6d9d26fba9-804a18c173.zip/node_modules/@langchain/mcp-adapters/",\
         "packageDependencies": [\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.3.5"],\
-          ["@langchain/mcp-adapters", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.1.3"],\
-          ["@modelcontextprotocol/sdk", "virtual:8c22f172a8bf1f9157aeb1dc4841ec0ddc4a96b84ae90c57e94a289d8c5ce06346f7d96789facd2c88e70e944ed6afab65273c4a732df91aeae2f6e87a261949#npm:1.29.0"],\
+          ["@langchain/langgraph", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5"],\
+          ["@langchain/mcp-adapters", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.1.3"],\
+          ["@modelcontextprotocol/sdk", "virtual:2352920f688ebe378ddd7045c05b0a873745a2fc2d31b37fc537444b089266ea792b9fa3d435533ff027a40feafce1bfe777fb2bc396b168ea4319febf241f2e#npm:1.29.0"],\
           ["@types/langchain__core", null],\
           ["@types/langchain__langgraph", null],\
           ["debug", "virtual:a9befa25e313e095e04a92d21e412bbc4cefabe625656c830f17ea194970509d9899df6dc6fba9e7ee796ee7a2b2f3d6abf75ecf43a9fea4755de2fe40280997#npm:4.4.3"],\
@@ -1597,30 +1618,30 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8c22f172a8bf1f9157aeb1dc4841ec0ddc4a96b84ae90c57e94a289d8c5ce06346f7d96789facd2c88e70e944ed6afab65273c4a732df91aeae2f6e87a261949#npm:1.29.0", {\
-        "packageLocation": "./.yarn/__virtual__/@modelcontextprotocol-sdk-virtual-cc28496614/0/cache/@modelcontextprotocol-sdk-npm-1.29.0-51771aaf2d-7c4bc33920.zip/node_modules/@modelcontextprotocol/sdk/",\
+      ["virtual:2352920f688ebe378ddd7045c05b0a873745a2fc2d31b37fc537444b089266ea792b9fa3d435533ff027a40feafce1bfe777fb2bc396b168ea4319febf241f2e#npm:1.29.0", {\
+        "packageLocation": "./.yarn/__virtual__/@modelcontextprotocol-sdk-virtual-ef169ae23c/0/cache/@modelcontextprotocol-sdk-npm-1.29.0-51771aaf2d-7c4bc33920.zip/node_modules/@modelcontextprotocol/sdk/",\
         "packageDependencies": [\
           ["@cfworker/json-schema", null],\
-          ["@hono/node-server", "virtual:cc28496614258f4c7ab35fdaecd583483196d864d711013793e930fb70733aeb1ae1f80c6bfcf1794ea6d66cea0a3fe3c65d7869dded13a439385127a0a563d8#npm:1.19.14"],\
-          ["@modelcontextprotocol/sdk", "virtual:8c22f172a8bf1f9157aeb1dc4841ec0ddc4a96b84ae90c57e94a289d8c5ce06346f7d96789facd2c88e70e944ed6afab65273c4a732df91aeae2f6e87a261949#npm:1.29.0"],\
+          ["@hono/node-server", "virtual:ef169ae23c86d0934fd3ac00a5b38597698c4ddd6ab035f9d0533a6d23f2c2e8ebbcb6381adc64254e1ed347943d8801cefde0b7870abbd709c939199688ca4f#npm:1.19.14"],\
+          ["@modelcontextprotocol/sdk", "virtual:2352920f688ebe378ddd7045c05b0a873745a2fc2d31b37fc537444b089266ea792b9fa3d435533ff027a40feafce1bfe777fb2bc396b168ea4319febf241f2e#npm:1.29.0"],\
           ["@types/cfworker__json-schema", null],\
           ["@types/zod", null],\
           ["ajv", "npm:8.20.0"],\
-          ["ajv-formats", "virtual:cc28496614258f4c7ab35fdaecd583483196d864d711013793e930fb70733aeb1ae1f80c6bfcf1794ea6d66cea0a3fe3c65d7869dded13a439385127a0a563d8#npm:3.0.1"],\
+          ["ajv-formats", "virtual:ef169ae23c86d0934fd3ac00a5b38597698c4ddd6ab035f9d0533a6d23f2c2e8ebbcb6381adc64254e1ed347943d8801cefde0b7870abbd709c939199688ca4f#npm:3.0.1"],\
           ["content-type", "npm:1.0.5"],\
           ["cors", "npm:2.8.6"],\
           ["cross-spawn", "npm:7.0.6"],\
           ["eventsource", "npm:3.0.7"],\
           ["eventsource-parser", "npm:3.1.0"],\
           ["express", "npm:5.2.1"],\
-          ["express-rate-limit", "virtual:cc28496614258f4c7ab35fdaecd583483196d864d711013793e930fb70733aeb1ae1f80c6bfcf1794ea6d66cea0a3fe3c65d7869dded13a439385127a0a563d8#npm:8.5.2"],\
+          ["express-rate-limit", "virtual:ef169ae23c86d0934fd3ac00a5b38597698c4ddd6ab035f9d0533a6d23f2c2e8ebbcb6381adc64254e1ed347943d8801cefde0b7870abbd709c939199688ca4f#npm:8.5.2"],\
           ["hono", "npm:4.12.23"],\
           ["jose", "npm:6.2.3"],\
           ["json-schema-typed", "npm:8.0.2"],\
           ["pkce-challenge", "npm:5.0.1"],\
           ["raw-body", "npm:3.0.2"],\
           ["zod", "npm:4.4.3"],\
-          ["zod-to-json-schema", "virtual:cc28496614258f4c7ab35fdaecd583483196d864d711013793e930fb70733aeb1ae1f80c6bfcf1794ea6d66cea0a3fe3c65d7869dded13a439385127a0a563d8#npm:3.25.2"]\
+          ["zod-to-json-schema", "virtual:ef169ae23c86d0934fd3ac00a5b38597698c4ddd6ab035f9d0533a6d23f2c2e8ebbcb6381adc64254e1ed347943d8801cefde0b7870abbd709c939199688ca4f#npm:3.25.2"]\
         ],\
         "packagePeers": [\
           "@cfworker/json-schema",\
@@ -2933,12 +2954,12 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["virtual:cc28496614258f4c7ab35fdaecd583483196d864d711013793e930fb70733aeb1ae1f80c6bfcf1794ea6d66cea0a3fe3c65d7869dded13a439385127a0a563d8#npm:3.0.1", {\
-        "packageLocation": "./.yarn/__virtual__/ajv-formats-virtual-14f73f578f/0/cache/ajv-formats-npm-3.0.1-2662cf5b12-168d6bca1e.zip/node_modules/ajv-formats/",\
+      ["virtual:ef169ae23c86d0934fd3ac00a5b38597698c4ddd6ab035f9d0533a6d23f2c2e8ebbcb6381adc64254e1ed347943d8801cefde0b7870abbd709c939199688ca4f#npm:3.0.1", {\
+        "packageLocation": "./.yarn/__virtual__/ajv-formats-virtual-0a8d2c5d85/0/cache/ajv-formats-npm-3.0.1-2662cf5b12-168d6bca1e.zip/node_modules/ajv-formats/",\
         "packageDependencies": [\
           ["@types/ajv", null],\
           ["ajv", "npm:8.20.0"],\
-          ["ajv-formats", "virtual:cc28496614258f4c7ab35fdaecd583483196d864d711013793e930fb70733aeb1ae1f80c6bfcf1794ea6d66cea0a3fe3c65d7869dded13a439385127a0a563d8#npm:3.0.1"]\
+          ["ajv-formats", "virtual:ef169ae23c86d0934fd3ac00a5b38597698c4ddd6ab035f9d0533a6d23f2c2e8ebbcb6381adc64254e1ed347943d8801cefde0b7870abbd709c939199688ca4f#npm:3.0.1"]\
         ],\
         "packagePeers": [\
           "@types/ajv",\
@@ -4311,12 +4332,12 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:cc28496614258f4c7ab35fdaecd583483196d864d711013793e930fb70733aeb1ae1f80c6bfcf1794ea6d66cea0a3fe3c65d7869dded13a439385127a0a563d8#npm:8.5.2", {\
-        "packageLocation": "./.yarn/__virtual__/express-rate-limit-virtual-2ceee9b666/0/cache/express-rate-limit-npm-8.5.2-8568b0d12d-c98c49b93e.zip/node_modules/express-rate-limit/",\
+      ["virtual:ef169ae23c86d0934fd3ac00a5b38597698c4ddd6ab035f9d0533a6d23f2c2e8ebbcb6381adc64254e1ed347943d8801cefde0b7870abbd709c939199688ca4f#npm:8.5.2", {\
+        "packageLocation": "./.yarn/__virtual__/express-rate-limit-virtual-5f9c1ff528/0/cache/express-rate-limit-npm-8.5.2-8568b0d12d-c98c49b93e.zip/node_modules/express-rate-limit/",\
         "packageDependencies": [\
           ["@types/express", null],\
           ["express", "npm:5.2.1"],\
-          ["express-rate-limit", "virtual:cc28496614258f4c7ab35fdaecd583483196d864d711013793e930fb70733aeb1ae1f80c6bfcf1794ea6d66cea0a3fe3c65d7869dded13a439385127a0a563d8#npm:8.5.2"],\
+          ["express-rate-limit", "virtual:ef169ae23c86d0934fd3ac00a5b38597698c4ddd6ab035f9d0533a6d23f2c2e8ebbcb6381adc64254e1ed347943d8801cefde0b7870abbd709c939199688ca4f#npm:8.5.2"],\
           ["ip-address", "npm:10.2.0"]\
         ],\
         "packagePeers": [\
@@ -5329,7 +5350,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@langchain/core", "npm:1.1.48"],\
           ["@langchain/langgraph", "virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.3.6"],\
-          ["@langchain/langgraph-checkpoint", "virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.0.4"],\
+          ["@langchain/langgraph-checkpoint", "virtual:4e97d12e70d9db636b73a693190178a2afee35a642475b7265eea92c554d0c98b689b91784a3d1698d031a398ba5a1761ab80c98a4171a3f74dcfc8dd82dcad5#npm:1.0.4"],\
           ["@types/langchain__core", null],\
           ["langchain", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.4.4"],\
           ["langsmith", "virtual:c899c3a62ab3b8a9c97636ff0c90447f4ea9969355bba1cc65fe1be49416ef23d516f5d01af4e94610fc4fe6f0e6c4fc809056486558dfd6b63c4f7d0be71691#npm:0.7.5"],\
@@ -7648,12 +7669,12 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:cc28496614258f4c7ab35fdaecd583483196d864d711013793e930fb70733aeb1ae1f80c6bfcf1794ea6d66cea0a3fe3c65d7869dded13a439385127a0a563d8#npm:3.25.2", {\
-        "packageLocation": "./.yarn/__virtual__/zod-to-json-schema-virtual-305bfcfe72/0/cache/zod-to-json-schema-npm-3.25.2-098928b88a-dd30055439.zip/node_modules/zod-to-json-schema/",\
+      ["virtual:ef169ae23c86d0934fd3ac00a5b38597698c4ddd6ab035f9d0533a6d23f2c2e8ebbcb6381adc64254e1ed347943d8801cefde0b7870abbd709c939199688ca4f#npm:3.25.2", {\
+        "packageLocation": "./.yarn/__virtual__/zod-to-json-schema-virtual-ed125a6120/0/cache/zod-to-json-schema-npm-3.25.2-098928b88a-dd30055439.zip/node_modules/zod-to-json-schema/",\
         "packageDependencies": [\
           ["@types/zod", null],\
           ["zod", "npm:4.4.3"],\
-          ["zod-to-json-schema", "virtual:cc28496614258f4c7ab35fdaecd583483196d864d711013793e930fb70733aeb1ae1f80c6bfcf1794ea6d66cea0a3fe3c65d7869dded13a439385127a0a563d8#npm:3.25.2"]\
+          ["zod-to-json-schema", "virtual:ef169ae23c86d0934fd3ac00a5b38597698c4ddd6ab035f9d0533a6d23f2c2e8ebbcb6381adc64254e1ed347943d8801cefde0b7870abbd709c939199688ca4f#npm:3.25.2"]\
         ],\
         "packagePeers": [\
           "@types/zod",\

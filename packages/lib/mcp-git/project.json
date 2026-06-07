@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "lib-mcp-git",
+  "projectType": "library",
+  "sourceRoot": "packages/lib/mcp-git/src",
+  "tags": ["scope:lib"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint packages/lib/mcp-git/src"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/lib/mcp-git",
+        "command": "tsc -p tsconfig.json"
+      }
+    }
+  }
+}

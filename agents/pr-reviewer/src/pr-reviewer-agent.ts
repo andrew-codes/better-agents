@@ -119,7 +119,7 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
   const subAgents = config.config?.subAgents;
 
   // The repository is always the current working directory.
-  const gitSubAgent = createGitSubAgent({
+  const gitSubAgent = await createGitSubAgent({
     model: resolveModel(subAgents?.git?.model),
     git: { cwd: process.cwd() },
   });
@@ -287,6 +287,7 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
       };
     },
     async close() {
+      await gitSubAgent.close();
       await prSubAgent.close();
       await publisherSubAgent.close();
     },

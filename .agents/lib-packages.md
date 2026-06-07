@@ -59,3 +59,10 @@ top-level agents and/or sub-agents.
   (uses the `bitbucket-mcp` package, authenticated via
   username/workspace/token). Same caller-supplied `allowedTools` contract as
   the GitHub package.
+- `@andrew-codes/better-agents-pkg-mcp-git` — config type (`GitMcpConfig`) and
+  MCP server-spec builder for the official **local-repository** Git server
+  (https://mcpservers.org/servers/modelcontextprotocol/git). Exposes
+  `gitMcp(config, allowedTools)`, returning an `McpServerSpec` (run via `uvx
+mcp-server-git --repository <path>`). Operates on the working tree directly —
+  no host credentials required. Same caller-supplied `allowedTools` contract as
+  the other MCP packages.

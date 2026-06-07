@@ -25,6 +25,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@andrew-codes/better-agents-pkg-mcp-git@workspace:*, @andrew-codes/better-agents-pkg-mcp-git@workspace:packages/lib/mcp-git":
+  version: 0.0.0-use.local
+  resolution: "@andrew-codes/better-agents-pkg-mcp-git@workspace:packages/lib/mcp-git"
+  dependencies:
+    "@andrew-codes/better-agents-pkg-mcp-utils": "workspace:*"
+    "@types/node": "npm:^22.0.0"
+    typescript: "npm:latest"
+  languageName: unknown
+  linkType: soft
+
 "@andrew-codes/better-agents-pkg-mcp-github@workspace:*, @andrew-codes/better-agents-pkg-mcp-github@workspace:packages/lib/mcp-github":
   version: 0.0.0-use.local
   resolution: "@andrew-codes/better-agents-pkg-mcp-github@workspace:packages/lib/mcp-github"
@@ -72,8 +82,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@andrew-codes/better-agents-pkg-sub-agent-git@workspace:packages/sub-agents/git"
   dependencies:
+    "@andrew-codes/better-agents-pkg-mcp-git": "workspace:*"
+    "@andrew-codes/better-agents-pkg-mcp-utils": "workspace:*"
     "@andrew-codes/better-agents-pkg-model": "workspace:*"
     "@langchain/core": "npm:^1.0.0"
+    "@langchain/langgraph": "npm:^1.2.0"
+    "@langchain/mcp-adapters": "npm:^1.0.0"
     "@types/node": "npm:^22.0.0"
     langchain: "npm:^1.4.0"
     typescript: "npm:latest"

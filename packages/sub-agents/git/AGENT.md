@@ -9,27 +9,48 @@ top-level agents that depend on it (no standalone build).
 - **System prompt**: empty (`src/prompt.md`). Behaviour is driven by the task
   message the orchestrator sends.
 
-## Tools (read-oriented, no shell)
+## Tools (read-oriented)
 
-| Tool                 | Purpose                                                                           |
-| -------------------- | --------------------------------------------------------------------------------- |
-| `git_current_branch` | Name of the checked-out branch                                                    |
-| `git_default_branch` | Repo's default branch (from `origin/HEAD`, falling back to local `main`/`master`) |
-| `git_status`         | Porcelain working-tree status                                                     |
-| `git_diff`           | Unified diff (`base...head` range or working tree vs `base`)                      |
-| `git_log`            | Commit log lines                                                                  |
-| `git_merge_base`     | Common ancestor of two refs                                                       |
+| Tool                 | Source | Purpose                                                                           |
+| -------------------- | ------ | --------------------------------------------------------------------------------- |
+| `git_current_branch` | custom | Name of the checked-out branch                                                    |
+| `git_default_branch` | custom | Repo's default branch (from `origin/HEAD`, falling back to local `main`/`master`) |
+| `git_status`         | MCP    | Working-tree status                                                               |
+| `git_diff`           | custom | Unified diff (`base...head` range or working tree vs `base`)                      |
+| `git_log`            | custom | Commit log lines                                                                  |
+| `git_merge_base`     | custom | Common ancestor of two refs                                                       |
 
-All commands run via `execFile("git", [...args])` — array-form arguments, never
+Custom tools run via `execFile("git", [...args])` — array-form arguments, never
 a shell — so caller input cannot inject shell metacharacters.
+
+## MCP integration
+
+`git_status` is delegated to the official Git MCP server
+(https://mcpservers.org/servers/modelcontextprotocol/git, run via `uvx
+mcp-server-git --repository <path>`) through
+`@andrew-codes/better-agents-pkg-mcp-git`. The repository path defaults to
+`process.cwd()` (or the `git.cwd` option, when supplied). The remaining tools
+stay custom because the orchestrator depends on `git_diff` producing symmetric
+`base...head` ranges and `git_log` producing `base..head` ranges — capabilities
+the MCP server's equivalents don't support — and because
+`git_current_branch`/`git_default_branch`/`git_merge_base` have no MCP
+equivalents.
+
+Because tool loading is asynchronous, `createGitSubAgent` now returns a
+`Promise<GitSubAgent>`, and the returned agent exposes `close()` to disconnect
+the MCP server subprocess.
 
 ## Usage
 
 ```ts
 import { createGitSubAgent } from "@andrew-codes/better-agents-pkg-sub-agent-git";
 
-const git = createGitSubAgent({ git: { cwd: repoPath } });
-const result = await git.invoke({
-  messages: [{ role: "user", content: "What is the current branch?" }],
-});
+const git = await createGitSubAgent({ git: { cwd: repoPath } });
+try {
+  const result = await git.invoke({
+    messages: [{ role: "user", content: "What is the current branch?" }],
+  });
+} finally {
+  await git.close();
+}
 ```
