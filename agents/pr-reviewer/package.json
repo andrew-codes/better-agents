@@ -10,8 +10,10 @@
   "dependencies": {
     "@andrew-codes/better-agents-pkg-config": "workspace:*",
     "@andrew-codes/better-agents-pkg-model": "workspace:*",
+    "@andrew-codes/better-agents-pkg-sub-agent-code-reviewer": "workspace:*",
     "@andrew-codes/better-agents-pkg-sub-agent-git": "workspace:*",
     "@andrew-codes/better-agents-pkg-sub-agent-pr-identification": "workspace:*",
+    "@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher": "workspace:*",
     "@langchain/core": "^1.0.0",
     "@langchain/langgraph": "^1.2.0",
     "@zed-industries/agent-client-protocol": "^0.4.0",

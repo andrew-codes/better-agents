@@ -32,6 +32,18 @@ function summarize(result: ReviewResult): string {
     lines.push("No open pull request found for this branch.");
   }
   lines.push("", `Diff (base ${result.baseRef}):`, result.diff || "(empty)");
+  lines.push("");
+  if (result.reviewPath) {
+    lines.push(`Review written to: ${result.reviewPath}`);
+  }
+  lines.push(`Approved: ${result.approved ? "yes" : "no"}`);
+  if (result.published) {
+    lines.push("", "Published feedback:", result.published);
+  } else if (result.approved) {
+    lines.push("Approved but nothing was published (no PR to post to).");
+  } else {
+    lines.push("Not published (review was not approved).");
+  }
   return lines.join("\n");
 }
 

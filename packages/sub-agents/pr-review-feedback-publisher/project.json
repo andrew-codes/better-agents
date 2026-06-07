@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "sub-agent-pr-review-feedback-publisher",
+  "projectType": "library",
+  "sourceRoot": "packages/sub-agents/pr-review-feedback-publisher/src",
+  "tags": ["scope:sub-agent"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint packages/sub-agents/pr-review-feedback-publisher/src"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/sub-agents/pr-review-feedback-publisher",
+        "command": "tsc -p tsconfig.json"
+      }
+    }
+  }
+}

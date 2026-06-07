@@ -26,6 +26,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@andrew-codes/better-agents-pkg-sub-agent-code-reviewer@workspace:*, @andrew-codes/better-agents-pkg-sub-agent-code-reviewer@workspace:packages/sub-agents/code-reviewer":
+  version: 0.0.0-use.local
+  resolution: "@andrew-codes/better-agents-pkg-sub-agent-code-reviewer@workspace:packages/sub-agents/code-reviewer"
+  dependencies:
+    "@andrew-codes/better-agents-pkg-model": "workspace:*"
+    "@langchain/core": "npm:^1.0.0"
+    "@types/node": "npm:^22.0.0"
+    typescript: "npm:latest"
+    zod: "npm:^4.0.0"
+  languageName: unknown
+  linkType: soft
+
 "@andrew-codes/better-agents-pkg-sub-agent-git@workspace:*, @andrew-codes/better-agents-pkg-sub-agent-git@workspace:packages/sub-agents/git":
   version: 0.0.0-use.local
   resolution: "@andrew-codes/better-agents-pkg-sub-agent-git@workspace:packages/sub-agents/git"
@@ -54,14 +66,31 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher@workspace:*, @andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher@workspace:packages/sub-agents/pr-review-feedback-publisher":
+  version: 0.0.0-use.local
+  resolution: "@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher@workspace:packages/sub-agents/pr-review-feedback-publisher"
+  dependencies:
+    "@andrew-codes/better-agents-pkg-model": "workspace:*"
+    "@langchain/core": "npm:^1.0.0"
+    "@langchain/langgraph": "npm:^1.2.0"
+    "@langchain/mcp-adapters": "npm:^1.0.0"
+    "@types/node": "npm:^22.0.0"
+    langchain: "npm:^1.4.0"
+    typescript: "npm:latest"
+    zod: "npm:^4.0.0"
+  languageName: unknown
+  linkType: soft
+
 "@andrew-codes/better-agents-pr-reviewer@workspace:agents/pr-reviewer":
   version: 0.0.0-use.local
   resolution: "@andrew-codes/better-agents-pr-reviewer@workspace:agents/pr-reviewer"
   dependencies:
     "@andrew-codes/better-agents-pkg-config": "workspace:*"
     "@andrew-codes/better-agents-pkg-model": "workspace:*"
+    "@andrew-codes/better-agents-pkg-sub-agent-code-reviewer": "workspace:*"
     "@andrew-codes/better-agents-pkg-sub-agent-git": "workspace:*"
     "@andrew-codes/better-agents-pkg-sub-agent-pr-identification": "workspace:*"
+    "@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher": "workspace:*"
     "@langchain/core": "npm:^1.0.0"
     "@langchain/langgraph": "npm:^1.2.0"
     "@rspack/cli": "npm:^1.0.0"
