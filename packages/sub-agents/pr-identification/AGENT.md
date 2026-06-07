@@ -11,10 +11,18 @@ Bundled into top-level agents that depend on it (no standalone build).
 
 ## Providers
 
-Configured via `gitProvider` (`github` | `bitbucket`). Each provider is backed
-by a scoped MCP server exposing **read-only PR/repo metadata only** — no tool
-that returns file contents or diffs is allowlisted, because the diff is
-computed locally by the top-level agent via `git diff`.
+Configured via `gitProvider` (`github` | `bitbucket`). The `GitProvider` /
+`ProviderConfig` union types come from
+[`@andrew-codes/better-agents-pkg-types-git-provider`](../../lib/types-git-provider);
+general MCP types (`McpServerSpec`, `scopeTools`) come from
+[`@andrew-codes/better-agents-pkg-mcp-utils`](../../lib/mcp-utils). Each
+provider's config type and MCP server-spec builder live together in their own
+dedicated lib —
+[`@andrew-codes/better-agents-pkg-mcp-github`](../../lib/mcp-github) and
+[`@andrew-codes/better-agents-pkg-mcp-bitbucket`](../../lib/mcp-bitbucket).
+This sub-agent supplies only the **allowlist**, scoped to **read-only PR/repo
+metadata**. No tool that returns file contents or diffs is exposed, because the
+diff is computed locally by the top-level agent via `git diff`.
 
 ### GitHub
 

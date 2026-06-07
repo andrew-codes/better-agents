@@ -2,16 +2,37 @@ import type { BaseChatModel } from "@langchain/core/language_models/chat_models"
 import type { StructuredToolInterface } from "@langchain/core/tools";
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
 import { createAgent } from "langchain";
+import { bitbucketMcp } from "@andrew-codes/better-agents-pkg-mcp-bitbucket";
+import { githubMcp } from "@andrew-codes/better-agents-pkg-mcp-github";
+import { scopeTools, type McpServerSpec } from "@andrew-codes/better-agents-pkg-mcp-utils";
 import { resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
-import { bitbucketMcp } from "./providers/bitbucket.js";
-import { githubMcp } from "./providers/github.js";
-import type { ProviderMcp } from "./providers/types.js";
+import type { ProviderConfig } from "@andrew-codes/better-agents-pkg-types-git-provider";
 import systemPrompt from "./prompt.md";
 import { createFileTools } from "./tools.js";
-import type { ProviderConfig } from "./types.js";
 
 /** Default model name for the feedback-publisher sub-agent. Overridable via config. */
 const DEFAULT_MODEL = "haiku-4.5";
+
+/**
+ * Write-capable PR comment / review tools to expose — enough to post feedback,
+ * nothing that edits code, pushes commits, or merges the PR.
+ */
+const ALLOWED_TOOLS: Record<ProviderConfig["type"], string[]> = {
+  github: [
+    "get_pull_request",
+    "create_pull_request_review",
+    "add_pull_request_review_comment",
+    "add_issue_comment",
+  ],
+  bitbucket: ["getPullRequest", "addPullRequestComment"],
+};
+
+/** Build the MCP server spec for the configured provider, scoped to `ALLOWED_TOOLS`. */
+function buildProviderMcp(provider: ProviderConfig): McpServerSpec {
+  return provider.type === "github"
+    ? githubMcp(provider, ALLOWED_TOOLS.github)
+    : bitbucketMcp(provider, ALLOWED_TOOLS.bitbucket);
+}
 
 /** Where to post: the minimal PR coordinates the publisher needs. */
 interface PublishTarget {
@@ -48,20 +69,6 @@ interface FeedbackPublisherSubAgent {
   close(): Promise<void>;
 }
 
-function providerMcp(provider: ProviderConfig): ProviderMcp {
-  return provider.type === "github" ? githubMcp(provider) : bitbucketMcp(provider);
-}
-
-/** Keep only the tools whose (possibly server-prefixed) name is allowlisted. */
-function scopeTools(
-  tools: StructuredToolInterface[],
-  allowed: string[],
-): StructuredToolInterface[] {
-  return tools.filter((t) =>
-    allowed.some((name) => t.name === name || t.name.endsWith(`__${name}`)),
-  );
-}
-
 /** Coerce the agent's final message content into a plain string. */
 function finalText(result: { messages: Array<{ content: unknown }> }): string {
   const last = result.messages[result.messages.length - 1];
@@ -90,7 +97,7 @@ function finalText(result: { messages: Array<{ content: unknown }> }): string {
 async function createFeedbackPublisherSubAgent(
   options: FeedbackPublisherOptions,
 ): Promise<FeedbackPublisherSubAgent> {
-  const mcp = providerMcp(options.provider);
+  const mcp = buildProviderMcp(options.provider);
 
   const client = new MultiServerMCPClient({
     mcpServers: {

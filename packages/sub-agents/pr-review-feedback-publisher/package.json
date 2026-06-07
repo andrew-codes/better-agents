@@ -8,7 +8,11 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@andrew-codes/better-agents-pkg-mcp-bitbucket": "workspace:*",
+    "@andrew-codes/better-agents-pkg-mcp-github": "workspace:*",
+    "@andrew-codes/better-agents-pkg-mcp-utils": "workspace:*",
     "@andrew-codes/better-agents-pkg-model": "workspace:*",
+    "@andrew-codes/better-agents-pkg-types-git-provider": "workspace:*",
     "@langchain/core": "^1.0.0",
     "@langchain/langgraph": "^1.2.0",
     "@langchain/mcp-adapters": "^1.0.0",

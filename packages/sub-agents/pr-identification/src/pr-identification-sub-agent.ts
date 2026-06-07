@@ -2,15 +2,33 @@ import type { BaseChatModel } from "@langchain/core/language_models/chat_models"
 import type { StructuredToolInterface } from "@langchain/core/tools";
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
 import { createAgent } from "langchain";
+import { bitbucketMcp } from "@andrew-codes/better-agents-pkg-mcp-bitbucket";
+import { githubMcp } from "@andrew-codes/better-agents-pkg-mcp-github";
+import { scopeTools, type McpServerSpec } from "@andrew-codes/better-agents-pkg-mcp-utils";
 import { resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
-import { bitbucketMcp } from "./providers/bitbucket.js";
-import { githubMcp } from "./providers/github.js";
-import type { ProviderMcp } from "./providers/types.js";
+import type { ProviderConfig } from "@andrew-codes/better-agents-pkg-types-git-provider";
 import systemPrompt from "./prompt.md";
-import { prDetailsSchema, type PrDetails, type ProviderConfig } from "./types.js";
+import { prDetailsSchema, type PrDetails } from "./types.js";
 
 /** Default model name for the PR-identification sub-agent. Overridable via config. */
 const DEFAULT_MODEL = "haiku-4.5";
+
+/**
+ * Read-only PR/repo metadata tools to expose. No tool that returns file
+ * contents or diffs is allowlisted — the diff is computed locally by the
+ * top-level agent via `git diff`.
+ */
+const ALLOWED_TOOLS: Record<ProviderConfig["type"], string[]> = {
+  github: ["list_pull_requests", "get_pull_request", "search_repositories"],
+  bitbucket: ["getPullRequests", "getPullRequest", "getRepository"],
+};
+
+/** Build the MCP server spec for the configured provider, scoped to `ALLOWED_TOOLS`. */
+function buildProviderMcp(provider: ProviderConfig): McpServerSpec {
+  return provider.type === "github"
+    ? githubMcp(provider, ALLOWED_TOOLS.github)
+    : bitbucketMcp(provider, ALLOWED_TOOLS.bitbucket);
+}
 
 interface PrIdentificationOptions {
   /** Resolved provider configuration (github or bitbucket). */
@@ -33,20 +51,6 @@ interface PrIdentificationSubAgent {
   close(): Promise<void>;
 }
 
-function providerMcp(provider: ProviderConfig): ProviderMcp {
-  return provider.type === "github" ? githubMcp(provider) : bitbucketMcp(provider);
-}
-
-/** Keep only the tools whose (possibly server-prefixed) name is allowlisted. */
-function scopeTools(
-  tools: StructuredToolInterface[],
-  allowed: string[],
-): StructuredToolInterface[] {
-  return tools.filter((t) =>
-    allowed.some((name) => t.name === name || t.name.endsWith(`__${name}`)),
-  );
-}
-
 /**
  * Create the PR-identification sub-agent: a ReAct agent wired to the provider's
  * MCP server (scoped to read-only PR/repo metadata) with an empty system
@@ -55,7 +59,7 @@ function scopeTools(
 async function createPrIdentificationSubAgent(
   options: PrIdentificationOptions,
 ): Promise<PrIdentificationSubAgent> {
-  const mcp = providerMcp(options.provider);
+  const mcp = buildProviderMcp(options.provider);
 
   const client = new MultiServerMCPClient({
     mcpServers: {

@@ -15,6 +15,36 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@andrew-codes/better-agents-pkg-mcp-bitbucket@workspace:*, @andrew-codes/better-agents-pkg-mcp-bitbucket@workspace:packages/lib/mcp-bitbucket":
+  version: 0.0.0-use.local
+  resolution: "@andrew-codes/better-agents-pkg-mcp-bitbucket@workspace:packages/lib/mcp-bitbucket"
+  dependencies:
+    "@andrew-codes/better-agents-pkg-mcp-utils": "workspace:*"
+    "@types/node": "npm:^22.0.0"
+    typescript: "npm:latest"
+  languageName: unknown
+  linkType: soft
+
+"@andrew-codes/better-agents-pkg-mcp-github@workspace:*, @andrew-codes/better-agents-pkg-mcp-github@workspace:packages/lib/mcp-github":
+  version: 0.0.0-use.local
+  resolution: "@andrew-codes/better-agents-pkg-mcp-github@workspace:packages/lib/mcp-github"
+  dependencies:
+    "@andrew-codes/better-agents-pkg-mcp-utils": "workspace:*"
+    "@types/node": "npm:^22.0.0"
+    typescript: "npm:latest"
+  languageName: unknown
+  linkType: soft
+
+"@andrew-codes/better-agents-pkg-mcp-utils@workspace:*, @andrew-codes/better-agents-pkg-mcp-utils@workspace:packages/lib/mcp-utils":
+  version: 0.0.0-use.local
+  resolution: "@andrew-codes/better-agents-pkg-mcp-utils@workspace:packages/lib/mcp-utils"
+  dependencies:
+    "@langchain/core": "npm:^1.0.0"
+    "@types/node": "npm:^22.0.0"
+    typescript: "npm:latest"
+  languageName: unknown
+  linkType: soft
+
 "@andrew-codes/better-agents-pkg-model@workspace:*, @andrew-codes/better-agents-pkg-model@workspace:packages/lib/model":
   version: 0.0.0-use.local
   resolution: "@andrew-codes/better-agents-pkg-model@workspace:packages/lib/model"
@@ -55,7 +85,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@andrew-codes/better-agents-pkg-sub-agent-pr-identification@workspace:packages/sub-agents/pr-identification"
   dependencies:
+    "@andrew-codes/better-agents-pkg-mcp-bitbucket": "workspace:*"
+    "@andrew-codes/better-agents-pkg-mcp-github": "workspace:*"
+    "@andrew-codes/better-agents-pkg-mcp-utils": "workspace:*"
     "@andrew-codes/better-agents-pkg-model": "workspace:*"
+    "@andrew-codes/better-agents-pkg-types-git-provider": "workspace:*"
     "@langchain/core": "npm:^1.0.0"
     "@langchain/langgraph": "npm:^1.2.0"
     "@langchain/mcp-adapters": "npm:^1.0.0"
@@ -70,7 +104,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher@workspace:packages/sub-agents/pr-review-feedback-publisher"
   dependencies:
+    "@andrew-codes/better-agents-pkg-mcp-bitbucket": "workspace:*"
+    "@andrew-codes/better-agents-pkg-mcp-github": "workspace:*"
+    "@andrew-codes/better-agents-pkg-mcp-utils": "workspace:*"
     "@andrew-codes/better-agents-pkg-model": "workspace:*"
+    "@andrew-codes/better-agents-pkg-types-git-provider": "workspace:*"
     "@langchain/core": "npm:^1.0.0"
     "@langchain/langgraph": "npm:^1.2.0"
     "@langchain/mcp-adapters": "npm:^1.0.0"
@@ -78,6 +116,17 @@ __metadata:
     langchain: "npm:^1.4.0"
     typescript: "npm:latest"
     zod: "npm:^4.0.0"
+  languageName: unknown
+  linkType: soft
+
+"@andrew-codes/better-agents-pkg-types-git-provider@workspace:*, @andrew-codes/better-agents-pkg-types-git-provider@workspace:packages/lib/types-git-provider":
+  version: 0.0.0-use.local
+  resolution: "@andrew-codes/better-agents-pkg-types-git-provider@workspace:packages/lib/types-git-provider"
+  dependencies:
+    "@andrew-codes/better-agents-pkg-mcp-bitbucket": "workspace:*"
+    "@andrew-codes/better-agents-pkg-mcp-github": "workspace:*"
+    "@types/node": "npm:^22.0.0"
+    typescript: "npm:latest"
   languageName: unknown
   linkType: soft
 
@@ -91,6 +140,7 @@ __metadata:
     "@andrew-codes/better-agents-pkg-sub-agent-git": "workspace:*"
     "@andrew-codes/better-agents-pkg-sub-agent-pr-identification": "workspace:*"
     "@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher": "workspace:*"
+    "@andrew-codes/better-agents-pkg-types-git-provider": "workspace:*"
     "@langchain/core": "npm:^1.0.0"
     "@langchain/langgraph": "npm:^1.2.0"
     "@rspack/cli": "npm:^1.0.0"

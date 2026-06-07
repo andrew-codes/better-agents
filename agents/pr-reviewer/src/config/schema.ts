@@ -1,5 +1,5 @@
+import type { GitProvider } from "@andrew-codes/better-agents-pkg-types-git-provider";
 import type { ModelConfig } from "@andrew-codes/better-agents-pkg-model";
-import type { GitProvider } from "@andrew-codes/better-agents-pkg-sub-agent-pr-identification";
 
 /** Resolved credentials for a git host, shared by provider-backed sub-agents. */
 interface GitProviderCredentials {

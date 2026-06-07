@@ -23,8 +23,24 @@ const RAW_RUNTIME_STATE =
       "reference": "workspace:packages/lib/config"\
     },\
     {\
+      "name": "@andrew-codes/better-agents-pkg-mcp-bitbucket",\
+      "reference": "workspace:packages/lib/mcp-bitbucket"\
+    },\
+    {\
+      "name": "@andrew-codes/better-agents-pkg-mcp-github",\
+      "reference": "workspace:packages/lib/mcp-github"\
+    },\
+    {\
+      "name": "@andrew-codes/better-agents-pkg-mcp-utils",\
+      "reference": "workspace:packages/lib/mcp-utils"\
+    },\
+    {\
       "name": "@andrew-codes/better-agents-pkg-model",\
       "reference": "workspace:packages/lib/model"\
+    },\
+    {\
+      "name": "@andrew-codes/better-agents-pkg-types-git-provider",\
+      "reference": "workspace:packages/lib/types-git-provider"\
     },\
     {\
       "name": "@andrew-codes/better-agents-pkg-sub-agent-code-reviewer",\
@@ -49,11 +65,15 @@ const RAW_RUNTIME_STATE =
   "fallbackExclusionList": [\
     ["@andrew-codes/better-agents", ["workspace:."]],\
     ["@andrew-codes/better-agents-pkg-config", ["workspace:packages/lib/config"]],\
+    ["@andrew-codes/better-agents-pkg-mcp-bitbucket", ["workspace:packages/lib/mcp-bitbucket"]],\
+    ["@andrew-codes/better-agents-pkg-mcp-github", ["workspace:packages/lib/mcp-github"]],\
+    ["@andrew-codes/better-agents-pkg-mcp-utils", ["workspace:packages/lib/mcp-utils"]],\
     ["@andrew-codes/better-agents-pkg-model", ["workspace:packages/lib/model"]],\
     ["@andrew-codes/better-agents-pkg-sub-agent-code-reviewer", ["workspace:packages/sub-agents/code-reviewer"]],\
     ["@andrew-codes/better-agents-pkg-sub-agent-git", ["workspace:packages/sub-agents/git"]],\
     ["@andrew-codes/better-agents-pkg-sub-agent-pr-identification", ["workspace:packages/sub-agents/pr-identification"]],\
     ["@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher", ["workspace:packages/sub-agents/pr-review-feedback-publisher"]],\
+    ["@andrew-codes/better-agents-pkg-types-git-provider", ["workspace:packages/lib/types-git-provider"]],\
     ["@andrew-codes/better-agents-pr-reviewer", ["workspace:agents/pr-reviewer"]]\
   ],\
   "fallbackPool": [\
@@ -107,6 +127,42 @@ const RAW_RUNTIME_STATE =
         "linkType": "SOFT"\
       }]\
     ]],\
+    ["@andrew-codes/better-agents-pkg-mcp-bitbucket", [\
+      ["workspace:packages/lib/mcp-bitbucket", {\
+        "packageLocation": "./packages/lib/mcp-bitbucket/",\
+        "packageDependencies": [\
+          ["@andrew-codes/better-agents-pkg-mcp-bitbucket", "workspace:packages/lib/mcp-bitbucket"],\
+          ["@andrew-codes/better-agents-pkg-mcp-utils", "workspace:packages/lib/mcp-utils"],\
+          ["@types/node", "npm:22.19.19"],\
+          ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"]\
+        ],\
+        "linkType": "SOFT"\
+      }]\
+    ]],\
+    ["@andrew-codes/better-agents-pkg-mcp-github", [\
+      ["workspace:packages/lib/mcp-github", {\
+        "packageLocation": "./packages/lib/mcp-github/",\
+        "packageDependencies": [\
+          ["@andrew-codes/better-agents-pkg-mcp-github", "workspace:packages/lib/mcp-github"],\
+          ["@andrew-codes/better-agents-pkg-mcp-utils", "workspace:packages/lib/mcp-utils"],\
+          ["@types/node", "npm:22.19.19"],\
+          ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"]\
+        ],\
+        "linkType": "SOFT"\
+      }]\
+    ]],\
+    ["@andrew-codes/better-agents-pkg-mcp-utils", [\
+      ["workspace:packages/lib/mcp-utils", {\
+        "packageLocation": "./packages/lib/mcp-utils/",\
+        "packageDependencies": [\
+          ["@andrew-codes/better-agents-pkg-mcp-utils", "workspace:packages/lib/mcp-utils"],\
+          ["@langchain/core", "npm:1.1.48"],\
+          ["@types/node", "npm:22.19.19"],\
+          ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"]\
+        ],\
+        "linkType": "SOFT"\
+      }]\
+    ]],\
     ["@andrew-codes/better-agents-pkg-model", [\
       ["workspace:packages/lib/model", {\
         "packageLocation": "./packages/lib/model/",\
@@ -153,8 +209,12 @@ const RAW_RUNTIME_STATE =
       ["workspace:packages/sub-agents/pr-identification", {\
         "packageLocation": "./packages/sub-agents/pr-identification/",\
         "packageDependencies": [\
+          ["@andrew-codes/better-agents-pkg-mcp-bitbucket", "workspace:packages/lib/mcp-bitbucket"],\
+          ["@andrew-codes/better-agents-pkg-mcp-github", "workspace:packages/lib/mcp-github"],\
+          ["@andrew-codes/better-agents-pkg-mcp-utils", "workspace:packages/lib/mcp-utils"],\
           ["@andrew-codes/better-agents-pkg-model", "workspace:packages/lib/model"],\
           ["@andrew-codes/better-agents-pkg-sub-agent-pr-identification", "workspace:packages/sub-agents/pr-identification"],\
+          ["@andrew-codes/better-agents-pkg-types-git-provider", "workspace:packages/lib/types-git-provider"],\
           ["@langchain/core", "npm:1.1.48"],\
           ["@langchain/langgraph", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.3.5"],\
           ["@langchain/mcp-adapters", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.1.3"],\
@@ -170,8 +230,12 @@ const RAW_RUNTIME_STATE =
       ["workspace:packages/sub-agents/pr-review-feedback-publisher", {\
         "packageLocation": "./packages/sub-agents/pr-review-feedback-publisher/",\
         "packageDependencies": [\
+          ["@andrew-codes/better-agents-pkg-mcp-bitbucket", "workspace:packages/lib/mcp-bitbucket"],\
+          ["@andrew-codes/better-agents-pkg-mcp-github", "workspace:packages/lib/mcp-github"],\
+          ["@andrew-codes/better-agents-pkg-mcp-utils", "workspace:packages/lib/mcp-utils"],\
           ["@andrew-codes/better-agents-pkg-model", "workspace:packages/lib/model"],\
           ["@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher", "workspace:packages/sub-agents/pr-review-feedback-publisher"],\
+          ["@andrew-codes/better-agents-pkg-types-git-provider", "workspace:packages/lib/types-git-provider"],\
           ["@langchain/core", "npm:1.1.48"],\
           ["@langchain/langgraph", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.3.5"],\
           ["@langchain/mcp-adapters", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.1.3"],\
@@ -179,6 +243,19 @@ const RAW_RUNTIME_STATE =
           ["langchain", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.4.4"],\
           ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"],\
           ["zod", "npm:4.4.3"]\
+        ],\
+        "linkType": "SOFT"\
+      }]\
+    ]],\
+    ["@andrew-codes/better-agents-pkg-types-git-provider", [\
+      ["workspace:packages/lib/types-git-provider", {\
+        "packageLocation": "./packages/lib/types-git-provider/",\
+        "packageDependencies": [\
+          ["@andrew-codes/better-agents-pkg-mcp-bitbucket", "workspace:packages/lib/mcp-bitbucket"],\
+          ["@andrew-codes/better-agents-pkg-mcp-github", "workspace:packages/lib/mcp-github"],\
+          ["@andrew-codes/better-agents-pkg-types-git-provider", "workspace:packages/lib/types-git-provider"],\
+          ["@types/node", "npm:22.19.19"],\
+          ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"]\
         ],\
         "linkType": "SOFT"\
       }]\
@@ -193,6 +270,7 @@ const RAW_RUNTIME_STATE =
           ["@andrew-codes/better-agents-pkg-sub-agent-git", "workspace:packages/sub-agents/git"],\
           ["@andrew-codes/better-agents-pkg-sub-agent-pr-identification", "workspace:packages/sub-agents/pr-identification"],\
           ["@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher", "workspace:packages/sub-agents/pr-review-feedback-publisher"],\
+          ["@andrew-codes/better-agents-pkg-types-git-provider", "workspace:packages/lib/types-git-provider"],\
           ["@andrew-codes/better-agents-pr-reviewer", "workspace:agents/pr-reviewer"],\
           ["@langchain/core", "npm:1.1.48"],\
           ["@langchain/langgraph", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.3.5"],\

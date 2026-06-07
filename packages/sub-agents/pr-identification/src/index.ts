@@ -4,10 +4,4 @@ export type {
   PrIdentificationSubAgent,
 } from "./pr-identification-sub-agent.js";
 export { prDetailsSchema } from "./types.js";
-export type {
-  BitbucketProviderConfig,
-  GitHubProviderConfig,
-  GitProvider,
-  PrDetails,
-  ProviderConfig,
-} from "./types.js";
+export type { PrDetails } from "./types.js";

@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "lib-types-git-provider",
+  "projectType": "library",
+  "sourceRoot": "packages/lib/types-git-provider/src",
+  "tags": ["scope:lib"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint packages/lib/types-git-provider/src"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/lib/types-git-provider",
+        "command": "tsc -p tsconfig.json"
+      }
+    }
+  }
+}

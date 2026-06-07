@@ -7,9 +7,3 @@ export type {
   FeedbackPublisherSubAgent,
   PublishTarget,
 } from "./pr-review-feedback-publisher-sub-agent.js";
-export type {
-  BitbucketProviderConfig,
-  GitHubProviderConfig,
-  GitProvider,
-  ProviderConfig,
-} from "./types.js";

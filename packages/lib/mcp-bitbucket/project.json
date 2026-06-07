@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "lib-mcp-bitbucket",
+  "projectType": "library",
+  "sourceRoot": "packages/lib/mcp-bitbucket/src",
+  "tags": ["scope:lib"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint packages/lib/mcp-bitbucket/src"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/lib/mcp-bitbucket",
+        "command": "tsc -p tsconfig.json"
+      }
+    }
+  }
+}

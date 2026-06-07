@@ -13,10 +13,17 @@ depend on it (no standalone build).
 ## Providers
 
 Configured via `gitProvider` (`github` | `bitbucket`), exactly like the
-pr-identification sub-agent. Each provider is backed by a scoped MCP server, but
-here the allowlist includes the provider's **write** tools so the agent can post
-to the PR. Only PR comment / review tools are exposed — nothing that edits code
-or merges the PR.
+pr-identification sub-agent. The `GitProvider` / `ProviderConfig` union types
+come from [`@andrew-codes/better-agents-pkg-types-git-provider`](../../lib/types-git-provider);
+general MCP types (`McpServerSpec`, `scopeTools`) come from
+[`@andrew-codes/better-agents-pkg-mcp-utils`](../../lib/mcp-utils). Each
+provider's config type and MCP server-spec builder live together in their own
+dedicated lib —
+[`@andrew-codes/better-agents-pkg-mcp-github`](../../lib/mcp-github) and
+[`@andrew-codes/better-agents-pkg-mcp-bitbucket`](../../lib/mcp-bitbucket).
+This sub-agent supplies only the **allowlist**, scoped to the provider's
+**write** tools so the agent can post to the PR. Only PR comment / review tools
+are exposed — nothing that edits code or merges the PR.
 
 ### GitHub
 

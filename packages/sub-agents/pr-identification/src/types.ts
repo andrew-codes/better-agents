@@ -1,25 +1,5 @@
 import { z } from "zod";
 
-/** Supported git hosting providers. */
-type GitProvider = "github" | "bitbucket";
-
-/** Resolved configuration for the GitHub provider. */
-interface GitHubProviderConfig {
-  type: "github";
-  /** Personal access token (from config.yml or the GITHUB_TOKEN env var). */
-  token: string;
-}
-
-/** Resolved configuration for the Bitbucket provider. */
-interface BitbucketProviderConfig {
-  type: "bitbucket";
-  username: string;
-  workspace: string;
-  token: string;
-}
-
-type ProviderConfig = GitHubProviderConfig | BitbucketProviderConfig;
-
 /**
  * Details about an identified pull request.
  *
@@ -43,11 +23,5 @@ const prDetailsSchema = z.object({
 
 type PrDetails = z.infer<typeof prDetailsSchema>;
 
-export type {
-  BitbucketProviderConfig,
-  GitHubProviderConfig,
-  GitProvider,
-  PrDetails,
-  ProviderConfig,
-};
+export type { PrDetails };
 export { prDetailsSchema };
