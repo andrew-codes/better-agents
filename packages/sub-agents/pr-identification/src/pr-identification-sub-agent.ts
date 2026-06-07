@@ -2,7 +2,7 @@ import type { BaseChatModel } from "@langchain/core/language_models/chat_models"
 import type { StructuredToolInterface } from "@langchain/core/tools";
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
 import { createAgent } from "langchain";
-import { DEFAULT_MODEL_NAME, resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
+import { resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
 import { bitbucketMcp } from "./providers/bitbucket.js";
 import { githubMcp } from "./providers/github.js";
 import type { ProviderMcp } from "./providers/types.js";
@@ -10,7 +10,7 @@ import systemPrompt from "./prompt.md";
 import { prDetailsSchema, type PrDetails, type ProviderConfig } from "./types.js";
 
 /** Default model name for the PR-identification sub-agent. Overridable via config. */
-const DEFAULT_MODEL = DEFAULT_MODEL_NAME;
+const DEFAULT_MODEL = "haiku-4.5";
 
 interface PrIdentificationOptions {
   /** Resolved provider configuration (github or bitbucket). */
@@ -71,7 +71,7 @@ async function createPrIdentificationSubAgent(
   const allTools = (await client.getTools()) as StructuredToolInterface[];
   const tools = scopeTools(allTools, mcp.allowedTools);
 
-  const model = options.model ?? resolveModelOrDefault(undefined);
+  const model = options.model ?? resolveModelOrDefault(undefined, DEFAULT_MODEL);
 
   const agent = createAgent({
     model,

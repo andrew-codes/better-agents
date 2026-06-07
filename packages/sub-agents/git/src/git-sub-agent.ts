@@ -2,13 +2,13 @@ import type { BaseChatModel } from "@langchain/core/language_models/chat_models"
 import type { BaseMessage, BaseMessageLike } from "@langchain/core/messages";
 import type { RunnableConfig } from "@langchain/core/runnables";
 import { createAgent } from "langchain";
-import { DEFAULT_MODEL_NAME, resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
+import { resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
 import type { GitContext } from "./git.js";
 import systemPrompt from "./prompt.md";
 import { createGitTools } from "./tools.js";
 
 /** Default model name for the git sub-agent. Overridable via the central config. */
-const DEFAULT_MODEL = DEFAULT_MODEL_NAME;
+const DEFAULT_MODEL = "haiku-4.5";
 
 interface GitSubAgentOptions {
   /**
@@ -35,7 +35,7 @@ interface GitSubAgent {
  * task message the orchestrator sends).
  */
 function createGitSubAgent(options: GitSubAgentOptions = {}): GitSubAgent {
-  const model = options.model ?? resolveModelOrDefault(undefined);
+  const model = options.model ?? resolveModelOrDefault(undefined, DEFAULT_MODEL);
 
   return createAgent({
     model,
