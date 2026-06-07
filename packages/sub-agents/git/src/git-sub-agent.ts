@@ -1,7 +1,7 @@
 import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import type { BaseMessage, BaseMessageLike } from "@langchain/core/messages";
 import type { RunnableConfig } from "@langchain/core/runnables";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import { createAgent } from "langchain";
 import { DEFAULT_MODEL_NAME, resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
 import type { GitContext } from "./git.js";
 import systemPrompt from "./prompt.md";
@@ -37,11 +37,11 @@ interface GitSubAgent {
 function createGitSubAgent(options: GitSubAgentOptions = {}): GitSubAgent {
   const model = options.model ?? resolveModelOrDefault(undefined);
 
-  return createReactAgent({
-    llm: model,
+  return createAgent({
+    model,
     tools: createGitTools(options.git),
     // The plan mandates an empty system prompt for this sub-agent.
-    prompt: systemPrompt || undefined,
+    systemPrompt: systemPrompt || undefined,
   });
 }
 

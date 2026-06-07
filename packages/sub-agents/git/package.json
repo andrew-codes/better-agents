@@ -10,7 +10,7 @@
   "dependencies": {
     "@andrew-codes/better-agents-pkg-model": "workspace:*",
     "@langchain/core": "^1.0.0",
-    "@langchain/langgraph": "^1.2.0",
+    "langchain": "^1.4.0",
     "zod": "^4.0.0"
   },
   "devDependencies": {

@@ -117,8 +117,8 @@ const RAW_RUNTIME_STATE =
           ["@andrew-codes/better-agents-pkg-model", "workspace:packages/lib/model"],\
           ["@andrew-codes/better-agents-pkg-sub-agent-git", "workspace:packages/sub-agents/git"],\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5"],\
           ["@types/node", "npm:22.19.19"],\
+          ["langchain", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.4.4"],\
           ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"],\
           ["zod", "npm:4.4.3"]\
         ],\
@@ -132,9 +132,10 @@ const RAW_RUNTIME_STATE =
           ["@andrew-codes/better-agents-pkg-model", "workspace:packages/lib/model"],\
           ["@andrew-codes/better-agents-pkg-sub-agent-pr-identification", "workspace:packages/sub-agents/pr-identification"],\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5"],\
+          ["@langchain/langgraph", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.3.5"],\
           ["@langchain/mcp-adapters", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.1.3"],\
           ["@types/node", "npm:22.19.19"],\
+          ["langchain", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.4.4"],\
           ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"],\
           ["zod", "npm:4.4.3"]\
         ],\
@@ -151,7 +152,7 @@ const RAW_RUNTIME_STATE =
           ["@andrew-codes/better-agents-pkg-sub-agent-pr-identification", "workspace:packages/sub-agents/pr-identification"],\
           ["@andrew-codes/better-agents-pr-reviewer", "workspace:agents/pr-reviewer"],\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5"],\
+          ["@langchain/langgraph", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.3.5"],\
           ["@rspack/cli", "virtual:bc857d08081ef78eea5854008f1abce2ec8cc6c57ab2751b828ebc2bcb8a854505012e51f41919acdc17ea64ce195e0858343c579dc8d750682bc8e54f67678b#npm:1.7.11"],\
           ["@rspack/core", "virtual:bc857d08081ef78eea5854008f1abce2ec8cc6c57ab2751b828ebc2bcb8a854505012e51f41919acdc17ea64ce195e0858343c579dc8d750682bc8e54f67678b#npm:1.7.11"],\
           ["@types/node", "npm:22.19.19"],\
@@ -1227,13 +1228,46 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5", {\
-        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-virtual-4e97d12e70/0/cache/@langchain-langgraph-npm-1.3.5-9dbef6c6d7-e129798e37.zip/node_modules/@langchain/langgraph/",\
+      ["npm:1.3.6", {\
+        "packageLocation": "./.yarn/cache/@langchain-langgraph-npm-1.3.6-c285d7b0f1-8f7af992e3.zip/node_modules/@langchain/langgraph/",\
+        "packageDependencies": [\
+          ["@langchain/langgraph", "npm:1.3.6"]\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.3.6", {\
+        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-virtual-08e3be0839/0/cache/@langchain-langgraph-npm-1.3.6-c285d7b0f1-8f7af992e3.zip/node_modules/@langchain/langgraph/",\
         "packageDependencies": [\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5"],\
-          ["@langchain/langgraph-checkpoint", "virtual:4e97d12e70d9db636b73a693190178a2afee35a642475b7265eea92c554d0c98b689b91784a3d1698d031a398ba5a1761ab80c98a4171a3f74dcfc8dd82dcad5#npm:1.0.4"],\
-          ["@langchain/langgraph-sdk", "virtual:4e97d12e70d9db636b73a693190178a2afee35a642475b7265eea92c554d0c98b689b91784a3d1698d031a398ba5a1761ab80c98a4171a3f74dcfc8dd82dcad5#npm:1.9.16"],\
+          ["@langchain/langgraph", "virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.3.6"],\
+          ["@langchain/langgraph-checkpoint", "virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.0.4"],\
+          ["@langchain/langgraph-sdk", "virtual:08e3be0839b02ccd109be32aab8cebc2035044a0c00410e52e9bd9f53460e26c0f686cfa549801356d736fb557d199a4e26b14d87727a4265bac6ad966709313#npm:1.9.17"],\
+          ["@langchain/protocol", "npm:0.0.16"],\
+          ["@standard-schema/spec", "npm:1.1.0"],\
+          ["@types/langchain__core", null],\
+          ["@types/zod", null],\
+          ["@types/zod-to-json-schema", null],\
+          ["uuid", "npm:14.0.0"],\
+          ["zod", "npm:4.4.3"],\
+          ["zod-to-json-schema", null]\
+        ],\
+        "packagePeers": [\
+          "@langchain/core",\
+          "@types/langchain__core",\
+          "@types/zod-to-json-schema",\
+          "@types/zod",\
+          "zod-to-json-schema",\
+          "zod"\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.3.5", {\
+        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-virtual-5f3122f0f3/0/cache/@langchain-langgraph-npm-1.3.5-9dbef6c6d7-e129798e37.zip/node_modules/@langchain/langgraph/",\
+        "packageDependencies": [\
+          ["@langchain/core", "npm:1.1.48"],\
+          ["@langchain/langgraph", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.3.5"],\
+          ["@langchain/langgraph-checkpoint", "virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.0.4"],\
+          ["@langchain/langgraph-sdk", "virtual:5f3122f0f3c378fba1811f443e6d69a2c38782c708398f2c3a95dc6a5587fe7e47f8e2d3c2ade173f40cad88c0fb2a919a66b48e3d44aa2fe97c7bac1ca8f745#npm:1.9.16"],\
           ["@langchain/protocol", "npm:0.0.16"],\
           ["@standard-schema/spec", "npm:1.1.0"],\
           ["@types/langchain__core", null],\
@@ -1262,11 +1296,11 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:4e97d12e70d9db636b73a693190178a2afee35a642475b7265eea92c554d0c98b689b91784a3d1698d031a398ba5a1761ab80c98a4171a3f74dcfc8dd82dcad5#npm:1.0.4", {\
-        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-checkpoint-virtual-21a63ce950/0/cache/@langchain-langgraph-checkpoint-npm-1.0.4-7874115d8e-83cd4a0461.zip/node_modules/@langchain/langgraph-checkpoint/",\
+      ["virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.0.4", {\
+        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-checkpoint-virtual-17be17de53/0/cache/@langchain-langgraph-checkpoint-npm-1.0.4-7874115d8e-83cd4a0461.zip/node_modules/@langchain/langgraph-checkpoint/",\
         "packageDependencies": [\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph-checkpoint", "virtual:4e97d12e70d9db636b73a693190178a2afee35a642475b7265eea92c554d0c98b689b91784a3d1698d031a398ba5a1761ab80c98a4171a3f74dcfc8dd82dcad5#npm:1.0.4"],\
+          ["@langchain/langgraph-checkpoint", "virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.0.4"],\
           ["@types/langchain__core", null],\
           ["uuid", "npm:14.0.0"]\
         ],\
@@ -1285,11 +1319,52 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:4e97d12e70d9db636b73a693190178a2afee35a642475b7265eea92c554d0c98b689b91784a3d1698d031a398ba5a1761ab80c98a4171a3f74dcfc8dd82dcad5#npm:1.9.16", {\
-        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-sdk-virtual-d31d67b174/0/cache/@langchain-langgraph-sdk-npm-1.9.16-009c1d0daf-7f9bb65deb.zip/node_modules/@langchain/langgraph-sdk/",\
+      ["npm:1.9.17", {\
+        "packageLocation": "./.yarn/cache/@langchain-langgraph-sdk-npm-1.9.17-b2cb5795ca-2cb4b77125.zip/node_modules/@langchain/langgraph-sdk/",\
+        "packageDependencies": [\
+          ["@langchain/langgraph-sdk", "npm:1.9.17"]\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["virtual:08e3be0839b02ccd109be32aab8cebc2035044a0c00410e52e9bd9f53460e26c0f686cfa549801356d736fb557d199a4e26b14d87727a4265bac6ad966709313#npm:1.9.17", {\
+        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-sdk-virtual-9498d30bd6/0/cache/@langchain-langgraph-sdk-npm-1.9.17-b2cb5795ca-2cb4b77125.zip/node_modules/@langchain/langgraph-sdk/",\
         "packageDependencies": [\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph-sdk", "virtual:4e97d12e70d9db636b73a693190178a2afee35a642475b7265eea92c554d0c98b689b91784a3d1698d031a398ba5a1761ab80c98a4171a3f74dcfc8dd82dcad5#npm:1.9.16"],\
+          ["@langchain/langgraph-sdk", "virtual:08e3be0839b02ccd109be32aab8cebc2035044a0c00410e52e9bd9f53460e26c0f686cfa549801356d736fb557d199a4e26b14d87727a4265bac6ad966709313#npm:1.9.17"],\
+          ["@langchain/protocol", "npm:0.0.16"],\
+          ["@types/json-schema", "npm:7.0.15"],\
+          ["@types/langchain__core", null],\
+          ["@types/react", null],\
+          ["@types/react-dom", null],\
+          ["@types/svelte", null],\
+          ["@types/vue", null],\
+          ["p-queue", "npm:9.3.0"],\
+          ["p-retry", "npm:7.1.1"],\
+          ["react", null],\
+          ["react-dom", null],\
+          ["svelte", null],\
+          ["uuid", "npm:14.0.0"],\
+          ["vue", null]\
+        ],\
+        "packagePeers": [\
+          "@langchain/core",\
+          "@types/langchain__core",\
+          "@types/react-dom",\
+          "@types/react",\
+          "@types/svelte",\
+          "@types/vue",\
+          "react-dom",\
+          "react",\
+          "svelte",\
+          "vue"\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["virtual:5f3122f0f3c378fba1811f443e6d69a2c38782c708398f2c3a95dc6a5587fe7e47f8e2d3c2ade173f40cad88c0fb2a919a66b48e3d44aa2fe97c7bac1ca8f745#npm:1.9.16", {\
+        "packageLocation": "./.yarn/__virtual__/@langchain-langgraph-sdk-virtual-4ae9451711/0/cache/@langchain-langgraph-sdk-npm-1.9.16-009c1d0daf-7f9bb65deb.zip/node_modules/@langchain/langgraph-sdk/",\
+        "packageDependencies": [\
+          ["@langchain/core", "npm:1.1.48"],\
+          ["@langchain/langgraph-sdk", "virtual:5f3122f0f3c378fba1811f443e6d69a2c38782c708398f2c3a95dc6a5587fe7e47f8e2d3c2ade173f40cad88c0fb2a919a66b48e3d44aa2fe97c7bac1ca8f745#npm:1.9.16"],\
           ["@langchain/protocol", "npm:0.0.16"],\
           ["@types/json-schema", "npm:7.0.15"],\
           ["@types/langchain__core", null],\
@@ -1332,7 +1407,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@langchain-mcp-adapters-virtual-8c22f172a8/0/cache/@langchain-mcp-adapters-npm-1.1.3-6d9d26fba9-804a18c173.zip/node_modules/@langchain/mcp-adapters/",\
         "packageDependencies": [\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5"],\
+          ["@langchain/langgraph", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.3.5"],\
           ["@langchain/mcp-adapters", "virtual:eba3b9c7898b93b335ec2e6330d2275b1ee4cc3e64894015a4dd4ad84e3e96b40e46224d782cd1a9e9ad4d62ca445cd6758ce7c159931a2fc8e2bd46ae6f4a9b#npm:1.1.3"],\
           ["@modelcontextprotocol/sdk", "virtual:8c22f172a8bf1f9157aeb1dc4841ec0ddc4a96b84ae90c57e94a289d8c5ce06346f7d96789facd2c88e70e944ed6afab65273c4a732df91aeae2f6e87a261949#npm:1.29.0"],\
           ["@types/langchain__core", null],\
@@ -5116,6 +5191,32 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["json-buffer", "npm:3.0.1"],\
           ["keyv", "npm:4.5.4"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["langchain", [\
+      ["npm:1.4.4", {\
+        "packageLocation": "./.yarn/cache/langchain-npm-1.4.4-10d579cc15-f8b846aac7.zip/node_modules/langchain/",\
+        "packageDependencies": [\
+          ["langchain", "npm:1.4.4"]\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.4.4", {\
+        "packageLocation": "./.yarn/__virtual__/langchain-virtual-a826f321ad/0/cache/langchain-npm-1.4.4-10d579cc15-f8b846aac7.zip/node_modules/langchain/",\
+        "packageDependencies": [\
+          ["@langchain/core", "npm:1.1.48"],\
+          ["@langchain/langgraph", "virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.3.6"],\
+          ["@langchain/langgraph-checkpoint", "virtual:a826f321adcf4bf7f5c18cc915e0ec3814b2ba772659645c16a7bb713d46880b8f6081a82bb709760da85ccf724b38425bccc82e75a27b7367c7139087ecbe6a#npm:1.0.4"],\
+          ["@types/langchain__core", null],\
+          ["langchain", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.4.4"],\
+          ["langsmith", "virtual:c899c3a62ab3b8a9c97636ff0c90447f4ea9969355bba1cc65fe1be49416ef23d516f5d01af4e94610fc4fe6f0e6c4fc809056486558dfd6b63c4f7d0be71691#npm:0.7.5"],\
+          ["zod", "npm:4.4.3"]\
+        ],\
+        "packagePeers": [\
+          "@langchain/core",\
+          "@types/langchain__core"\
         ],\
         "linkType": "HARD"\
       }]\

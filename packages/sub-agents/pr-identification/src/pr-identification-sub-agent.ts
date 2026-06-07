@@ -1,7 +1,7 @@
 import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import type { StructuredToolInterface } from "@langchain/core/tools";
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import { createAgent } from "langchain";
 import { DEFAULT_MODEL_NAME, resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
 import { bitbucketMcp } from "./providers/bitbucket.js";
 import { githubMcp } from "./providers/github.js";
@@ -73,16 +73,12 @@ async function createPrIdentificationSubAgent(
 
   const model = options.model ?? resolveModelOrDefault(undefined);
 
-  const agent = createReactAgent({
-    llm: model,
+  const agent = createAgent({
+    model,
     tools,
     // The plan mandates an empty system prompt for this sub-agent.
-    prompt: systemPrompt || undefined,
-    responseFormat: {
-      prompt:
-        "Return the details of the identified pull request. Do not include any code diff or file contents.",
-      schema: prDetailsSchema,
-    },
+    systemPrompt: systemPrompt || undefined,
+    responseFormat: prDetailsSchema,
   });
 
   return {
@@ -91,13 +87,15 @@ async function createPrIdentificationSubAgent(
         `Find the open ${options.provider.type} pull request whose source ` +
         `(head) branch is exactly "${branch}". Use only the available tools ` +
         `to look up repository and pull request metadata. Do NOT fetch the ` +
-        `code diff or file contents. If no matching open PR exists, say so.`;
+        `code diff or file contents. If no matching open PR exists, say so. ` +
+        `Return the details of the identified pull request; do not include ` +
+        `any code diff or file contents in the response.`;
 
       const result = await agent.invoke({
         messages: [{ role: "user", content: task }],
       });
 
-      const structured = (result as { structuredResponse?: PrDetails }).structuredResponse;
+      const structured = (result.structuredResponse ?? undefined) as PrDetails | undefined;
       return structured ?? null;
     },
     async close() {
