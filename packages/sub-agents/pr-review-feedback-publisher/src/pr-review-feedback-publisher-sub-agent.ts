@@ -21,8 +21,10 @@ const DEFAULT_MODEL = "haiku-4.5";
 const ALLOWED_TOOLS: Record<ProviderConfig["type"], string[]> = {
   github: [
     "get_pull_request",
+    // create_pull_request_review carries the summary (body), the verdict
+    // (event) and every inline finding (comments[]) in one call.
     "create_pull_request_review",
-    "add_pull_request_review_comment",
+    // Fallback only, for feedback with no file/line to anchor to.
     "add_issue_comment",
   ],
   bitbucket: ["getPullRequest", "addPullRequestComment"],
@@ -63,7 +65,9 @@ interface FeedbackPublisherOptions {
 interface FeedbackPublisherSubAgent {
   /**
    * Read the approved review at `reviewFilePath` and post it to `target` as a
-   * review comment on the pull request. Returns the agent's final message.
+   * pull-request review: the summary as the review body, each located finding as
+   * an inline comment on its cited file/line, and a request-changes verdict when
+   * the review contains blocking findings. Returns the agent's final message.
    * `config` is forwarded to the underlying ReAct agent (e.g. to attach
    * callbacks for progress reporting).
    */
@@ -137,9 +141,11 @@ async function createFeedbackPublisherSubAgent(
         `request #${target.number} (${target.url}).\n` +
         (target.title ? `PR title: ${target.title}\n` : "") +
         `The approved review file is at "${reviewFilePath}". Read it with ` +
-        `read_review_file, extract the reviewer feedback, and post it to the PR ` +
-        `as a single review comment using the provider's tools. Derive the ` +
-        `repository owner/name (or workspace/repo) from the PR URL.`;
+        `read_review_file, then post it as one pull-request review: the summary ` +
+        `as the review body, each located finding as an inline comment anchored ` +
+        `to its cited file and line, and the verdict set to request-changes when ` +
+        `there is any blocking finding. Derive the repository owner/name (or ` +
+        `workspace/repo) from the PR URL.`;
 
       const result = await agent.invoke(
         {

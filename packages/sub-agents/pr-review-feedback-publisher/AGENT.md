@@ -14,13 +14,13 @@ Configured via `gitProvider` (`github` | `bitbucket`), exactly like the pr-ident
 
 - MCP: `@modelcontextprotocol/server-github`
 - Auth: `GITHUB_TOKEN` (config.yml or env), mapped to the server's `GITHUB_PERSONAL_ACCESS_TOKEN`.
-- Allowlisted tools: `get_pull_request`, `create_pull_request_review`, `add_pull_request_review_comment`, `add_issue_comment`.
+- Allowlisted tools: `get_pull_request`, `create_pull_request_review`, `add_issue_comment`. Findings are posted as one review via `create_pull_request_review` — its `body` carries the summary, `event` carries the verdict (`REQUEST_CHANGES` when there are blocking findings, else `COMMENT`), and `comments[]` carries each finding as an inline comment anchored to its file/line. `add_issue_comment` is a fallback for feedback with no line to anchor to. (Note: this server version exposes no standalone `add_pull_request_review_comment` tool.)
 
 ### Bitbucket
 
 - MCP: [`bitbucket-mcp`](https://www.npmjs.com/package/bitbucket-mcp)
 - Auth: `BITBUCKET_USERNAME`, `BITBUCKET_WORKSPACE`, `BITBUCKET_TOKEN` (config.yml or env).
-- Allowlisted tools: `getPullRequest`, `addPullRequestComment`.
+- Allowlisted tools: `getPullRequest`, `addPullRequestComment`. The summary is posted as a general comment; each located finding is a separate `addPullRequestComment` with `inline: { path, to }` anchoring it to the new-side line. Bitbucket exposes no request-changes verdict here, so a request-changes outcome is stated in the summary comment text.
 
 ## Local file access
 
