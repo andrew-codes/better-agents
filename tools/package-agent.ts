@@ -2,8 +2,8 @@
 /**
  * Package phase for a top-level agent.
  *
- * Copies the Rspack `.build/` output into `.dist/` and writes a trimmed
- * `package.json` that:
+ * Copies the Rspack `.build/` output and the repo's `LICENSE` into `.dist/`
+ * and writes a trimmed `package.json` that:
  *   - removes `devDependencies`
  *   - removes any `@andrew-codes/better-agents-pkg-*` dependency (workspace
  *     libs and sub-agents are already bundled inline by Rspack)
@@ -15,6 +15,7 @@ import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const BUNDLED_PKG_PREFIX = "@andrew-codes/better-agents-pkg-";
+const REPO_ROOT = resolve(import.meta.dirname, "..");
 
 interface AgentPackageJson {
   name: string;
@@ -37,6 +38,7 @@ async function packageAgent(projectRootArg: string): Promise<void> {
   await rm(distDir, { recursive: true, force: true });
   await mkdir(distDir, { recursive: true });
   await cp(buildDir, distDir, { recursive: true });
+  await cp(join(REPO_ROOT, "LICENSE"), join(distDir, "LICENSE"));
 
   const pkg = JSON.parse(
     await readFile(join(projectRoot, "package.json"), "utf8"),

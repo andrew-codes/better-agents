@@ -1,6 +1,7 @@
 {
   "name": "@andrew-codes/better-agents",
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "packageManager": "yarn@4.16.0",
   "workspaces": [
     "agents/*",
