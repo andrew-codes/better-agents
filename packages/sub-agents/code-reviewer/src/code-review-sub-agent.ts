@@ -1,6 +1,13 @@
 import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import type { MessageContent } from "@langchain/core/messages";
 import { resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
+import {
+  CHARS_PER_TOKEN_ESTIMATE,
+  chunkDiffFiles,
+  estimateTokens,
+  partitionExcluded,
+  splitDiffByFile,
+} from "./diff.js";
 import basePrompt from "./prompt.md";
 
 /**
@@ -9,6 +16,17 @@ import basePrompt from "./prompt.md";
  * sub-agents. Overridable via the central config.yml.
  */
 const DEFAULT_MODEL = "opus-4.8";
+
+/**
+ * Soft budget for the diff payload alone, in estimated tokens. Conservative
+ * relative to Claude's 200K context window — it leaves headroom for the
+ * system prompt, PR metadata, prior-review/feedback text on revisions, and
+ * the model's own output, and keeps each chunked pass focused enough to stay
+ * coherent. Diffs that exceed it are reviewed in file-grouped chunks instead
+ * of a single pass.
+ */
+const MAX_DIFF_TOKENS = 60_000;
+const MAX_DIFF_CHARS = MAX_DIFF_TOKENS * CHARS_PER_TOKEN_ESTIMATE;
 
 interface CodeReviewSubAgentOptions {
   /**
@@ -120,12 +138,43 @@ function splitChunk(content: MessageContent): { text: string; thinking: string }
   return { text, thinking };
 }
 
+/**
+ * Notes threaded into a review task: paths omitted from the diff and, when
+ * the diff was too large for one pass, this pass's slice of it.
+ */
+interface TaskNotes {
+  excludedPaths: readonly string[];
+  scope?: { index: number; total: number; files: readonly string[] };
+}
+
+/** Render `notes` into a Markdown fragment for the task header, or `null` when there's nothing to say. */
+function renderNotes(notes: TaskNotes): string | null {
+  const lines: string[] = [];
+  if (notes.scope) {
+    const { index, total, files } = notes.scope;
+    lines.push(
+      `This diff was too large to review in one pass and was split by file. ` +
+        `You are reviewing part ${index} of ${total}, covering: ${files.join(", ")}. ` +
+        `Review only these files — other passes cover the rest.`,
+    );
+  }
+  if (notes.excludedPaths.length) {
+    lines.push(
+      `These paths were omitted from the diff before review (generated dependency ` +
+        `lockfiles and/or vendored Yarn PnP artifacts — not meaningful to review ` +
+        `line-by-line): ${notes.excludedPaths.join(", ")}.`,
+    );
+  }
+  return lines.length ? lines.join("\n") : null;
+}
+
 /** Build the human-message task for an initial review. */
-function reviewTask(input: CodeReviewInput): string {
+function reviewTask(input: CodeReviewInput, notes: TaskNotes): string {
   const header = [
     input.title ? `PR title: ${input.title}` : null,
     input.baseRef ? `Diff base: ${input.baseRef}` : null,
     input.description ? `PR description:\n${input.description}` : null,
+    renderNotes(notes),
   ]
     .filter(Boolean)
     .join("\n");
@@ -143,12 +192,13 @@ function reviewTask(input: CodeReviewInput): string {
 }
 
 /** Build the human-message task for a revision pass. */
-function revisionTask(input: CodeReviewInput): string {
+function revisionTask(input: CodeReviewInput, notes: TaskNotes): string {
   const { priorReview, feedback } = input.revision!;
   return [
     "Revise your earlier code review to address the human reviewer's feedback.",
     "Keep everything that still applies; change only what the feedback calls for.",
     "Return the full revised review as Markdown.",
+    renderNotes(notes),
     "Your earlier review:",
     "```markdown",
     priorReview,
@@ -159,13 +209,83 @@ function revisionTask(input: CodeReviewInput): string {
     "```diff",
     input.diff || "(empty diff)",
     "```",
-  ].join("\n\n");
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+}
+
+/** A chunk's reviewed files and the (Markdown) review produced for them. */
+interface ChunkReview {
+  files: readonly string[];
+  review: string;
+}
+
+/** Stitch independently-produced chunk reviews into a single Markdown document. */
+function combineChunkReviews(chunks: readonly ChunkReview[], excludedPaths: readonly string[]): string {
+  const notes = [
+    `_This diff was large enough to require splitting into ${chunks.length} parts by ` +
+      `file; each part below was reviewed independently and may repeat context._`,
+    excludedPaths.length
+      ? `_Omitted from review (generated lockfiles/vendored Yarn PnP artifacts): ` +
+        `${excludedPaths.join(", ")}._`
+      : null,
+  ].filter((line): line is string => Boolean(line));
+
+  const sections = chunks.map(
+    (chunk, i) => `## Part ${i + 1} of ${chunks.length} — ${chunk.files.join(", ")}\n\n${chunk.review}`,
+  );
+
+  return [...notes, ...sections].join("\n\n");
 }
 
 /**
- * Create the code-reviewer sub-agent. Reviewing a diff needs no tools, so this
- * is a single model invocation whose system prompt fuses the base prompt with
- * the configured principles and tone.
+ * Run a single review/revision pass: invoke the model (streaming through
+ * `onThought` when supplied, otherwise a single blocking call) and return the
+ * resulting Markdown.
+ */
+async function runPass(
+  model: BaseChatModel,
+  systemPrompt: string,
+  task: string,
+  onThought?: CodeReviewInput["onThought"],
+): Promise<string> {
+  const messages = [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: task },
+  ];
+
+  if (!onThought) {
+    const result = await model.invoke(messages);
+    return contentToString(result.content).trim();
+  }
+
+  // With a thought sink, stream so the reviewer's progress is observable.
+  // Reasoning deltas and answer deltas are both reported; only the answer
+  // text is accumulated into the returned review.
+  let review = "";
+  const stream = await model.stream(messages);
+  for await (const chunk of stream) {
+    const { text, thinking } = splitChunk(chunk.content);
+    if (thinking) await onThought(thinking);
+    if (text) {
+      review += text;
+      await onThought(text);
+    }
+  }
+  return review.trim();
+}
+
+/**
+ * Create the code-reviewer sub-agent. Reviewing a diff needs no tools, so each
+ * pass is a single model invocation whose system prompt fuses the base prompt
+ * with the configured principles and tone.
+ *
+ * Before reviewing, the diff is split per file so that machine-generated
+ * lockfiles and vendored Yarn PnP artifacts (see {@link partitionExcluded})
+ * can be dropped — they're enormous, regenerated by tooling, and not
+ * meaningful to review. If what remains still exceeds {@link MAX_DIFF_TOKENS},
+ * it's reviewed in file-grouped chunks (see {@link chunkDiffFiles}) and the
+ * partial reviews are stitched into one document.
  */
 function createCodeReviewSubAgent(options: CodeReviewSubAgentOptions = {}): CodeReviewSubAgent {
   const model = options.model ?? resolveModelOrDefault(undefined, DEFAULT_MODEL);
@@ -173,35 +293,39 @@ function createCodeReviewSubAgent(options: CodeReviewSubAgentOptions = {}): Code
 
   return {
     async review(input: CodeReviewInput) {
-      const task = input.revision ? revisionTask(input) : reviewTask(input);
-      const messages = [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: task },
-      ];
+      const { kept, excludedPaths } = partitionExcluded(splitDiffByFile(input.diff));
+      const filteredDiff = kept.map((file) => file.text).join("\n");
 
-      // Without a thought sink, a single blocking call is simplest.
-      if (!input.onThought) {
-        const result = await model.invoke(messages);
-        return contentToString(result.content).trim();
+      if (estimateTokens(filteredDiff) <= MAX_DIFF_TOKENS) {
+        const scopedInput = { ...input, diff: filteredDiff };
+        const task = input.revision
+          ? revisionTask(scopedInput, { excludedPaths })
+          : reviewTask(scopedInput, { excludedPaths });
+        return runPass(model, systemPrompt, task, input.onThought);
       }
 
-      // With a thought sink, stream so the reviewer's progress is observable.
-      // Reasoning deltas and answer deltas are both reported; only the answer
-      // text is accumulated into the returned review.
-      let review = "";
-      const stream = await model.stream(messages);
-      for await (const chunk of stream) {
-        const { text, thinking } = splitChunk(chunk.content);
-        if (thinking) await input.onThought(thinking);
-        if (text) {
-          review += text;
-          await input.onThought(text);
+      // Too large for one pass: review file-grouped chunks independently and
+      // stitch the partial reviews into a single document.
+      const chunks = chunkDiffFiles(kept, MAX_DIFF_CHARS);
+      const reviews: ChunkReview[] = [];
+      for (const [i, chunk] of chunks.entries()) {
+        const files = [...new Set(chunk.map((file) => file.path))];
+        const scope = { index: i + 1, total: chunks.length, files };
+        if (input.onThought) {
+          await input.onThought(
+            `\n↪ Reviewing part ${scope.index}/${scope.total}: ${files.join(", ")}\n`,
+          );
         }
+        const chunkInput = { ...input, diff: chunk.map((file) => file.text).join("\n") };
+        const task = input.revision
+          ? revisionTask(chunkInput, { excludedPaths, scope })
+          : reviewTask(chunkInput, { excludedPaths, scope });
+        reviews.push({ files, review: await runPass(model, systemPrompt, task, input.onThought) });
       }
-      return review.trim();
+      return combineChunkReviews(reviews, excludedPaths);
     },
   };
 }
 
 export type { CodeReviewInput, CodeReviewSubAgent, CodeReviewSubAgentOptions };
-export { DEFAULT_MODEL, createCodeReviewSubAgent };
+export { DEFAULT_MODEL, MAX_DIFF_TOKENS, createCodeReviewSubAgent };
