@@ -15,9 +15,7 @@ packages/lib/          # Shared library packages bundled into agents
 tools/                 # Repo tooling scripts (TypeScript, run via tsx)
 ```
 
-All `@andrew-codes/better-agents-pkg-*` workspace packages (sub-agents and
-shared libs) are bundled inline into top-level agents at build time and
-stripped from the distributed `package.json`.
+All `@andrew-codes/better-agents-pkg-*` workspace packages (sub-agents and shared libs) are bundled inline into top-level agents at build time and stripped from the distributed `package.json`.
 
 ## Commands
 

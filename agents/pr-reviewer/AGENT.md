@@ -1,7 +1,6 @@
 # agent: pr-reviewer
 
-It reviews the pull request associated with the
-current git branch by coordinating a fixed workflow across dedicated sub-agents.
+It reviews the pull request associated with the current git branch by coordinating a fixed workflow across dedicated sub-agents.
 
 - **Package**: `@andrew-codes/better-agents-pr-reviewer`
 - **Exposure**: ACP over stdio (`@zed-industries/agent-client-protocol`).
@@ -17,35 +16,23 @@ detectBranch (git sub-agent)
    → publishFeedback (pr-review-feedback-publisher)  # only when approved
 ```
 
-The PR's code diff is always produced locally via `git diff`; it is never
-fetched from the hosting provider.
+The PR's code diff is always produced locally via `git diff`; it is never fetched from the hosting provider.
 
-The repository is always the current working directory, and the diff base is
-the PR's target branch — or, when no PR is found, the repository's default
-branch (detected from `origin/HEAD`). Neither is configurable.
+The repository is always the current working directory, and the diff base is the PR's target branch — or, when no PR is found, the repository's default branch (detected from `origin/HEAD`). Neither is configurable.
 
 ### Review, annotate, publish
 
-The code review is written to `tmp/reviews/<PR-ID>-YYYY-MM-DD.md` (relative to
-the repository) and opened in **plannotator** via `plannotator annotate <file>
---json`, which blocks until the human resolves the session:
+The code review is written to `tmp/reviews/<PR-ID>-YYYY-MM-DD.md` (relative to the repository) and opened in **plannotator** via `plannotator annotate <file> --json`, which blocks until the human resolves the session:
 
-- **approved** — the file holds the approved review; the workflow proceeds to
-  publish.
-- **annotated** — the human's feedback is fed back to the code-reviewer
-  sub-agent, which revises the review; the updated file is re-presented. This
-  repeats (bounded) until approval or dismissal.
+- **approved** — the file holds the approved review; the workflow proceeds to publish.
+- **annotated** — the human's feedback is fed back to the code-reviewer sub-agent, which revises the review; the updated file is re-presented. This repeats (bounded) until approval or dismissal.
 - **dismissed** — the workflow stops; nothing is published.
 
-On approval, the approved review file is handed to the
-**pr-review-feedback-publisher** sub-agent, which reads it and posts the
-feedback to the PR using its configured provider. When there is no PR, nothing
-is published.
+On approval, the approved review file is handed to the **pr-review-feedback-publisher** sub-agent, which reads it and posts the feedback to the PR using its configured provider. When there is no PR, nothing is published.
 
 ## Configuration
 
-Read from `~/.config/better-agents/config.yml` under the `pr-reviewer` entry.
-All keys are optional; defaults are shown.
+Read from `~/.config/better-agents/config.yml` under the `pr-reviewer` entry. All keys are optional; defaults are shown.
 
 ```yaml
 agents:
@@ -91,8 +78,6 @@ agents:
               token: ${BITBUCKET_TOKEN}
 ```
 
-`plannotator` must be installed and on `PATH` (the agent shells out to
-`plannotator annotate <file> --json`).
+`plannotator` must be installed and on `PATH` (the agent shells out to `plannotator annotate <file> --json`).
 
-Provider credentials may be supplied either in `config.yml` or via the
-corresponding environment variables.
+Provider credentials may be supplied either in `config.yml` or via the corresponding environment variables.

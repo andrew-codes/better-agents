@@ -39,7 +39,8 @@ function createGitTools(ctx: GitContext = {}) {
   });
 
   const gitDiff = tool(
-    async ({ base, head, paths, includeGenerated }) => diff({ base, head, paths, includeGenerated }, ctx),
+    async ({ base, head, paths, includeGenerated }) =>
+      diff({ base, head, paths, includeGenerated }, ctx),
     {
       name: "git_diff",
       description:

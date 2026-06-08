@@ -221,7 +221,10 @@ interface ChunkReview {
 }
 
 /** Stitch independently-produced chunk reviews into a single Markdown document. */
-function combineChunkReviews(chunks: readonly ChunkReview[], excludedPaths: readonly string[]): string {
+function combineChunkReviews(
+  chunks: readonly ChunkReview[],
+  excludedPaths: readonly string[],
+): string {
   const notes = [
     `_This diff was large enough to require splitting into ${chunks.length} parts by ` +
       `file; each part below was reviewed independently and may repeat context._`,
@@ -232,7 +235,8 @@ function combineChunkReviews(chunks: readonly ChunkReview[], excludedPaths: read
   ].filter((line): line is string => Boolean(line));
 
   const sections = chunks.map(
-    (chunk, i) => `## Part ${i + 1} of ${chunks.length} — ${chunk.files.join(", ")}\n\n${chunk.review}`,
+    (chunk, i) =>
+      `## Part ${i + 1} of ${chunks.length} — ${chunk.files.join(", ")}\n\n${chunk.review}`,
   );
 
   return [...notes, ...sections].join("\n\n");
