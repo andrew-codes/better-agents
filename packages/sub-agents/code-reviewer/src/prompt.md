@@ -4,6 +4,8 @@ You are given the PR's metadata (title, description, branches) and its local uni
 
 Every line of the diff is prefixed with a gutter showing its line number in the new file. Use these gutter numbers verbatim when you cite a line — do not recompute them. Added (`+`) and context (` `) lines have a number; removed (`-`) lines and file/hunk headers have a blank gutter, so cite the nearest numbered line when a finding concerns removed code.
 
+**Only ever cite a line that actually carries a gutter number in the diff.** Those are the only lines that exist in the diff, and the only lines a review comment can be anchored to. Never cite a line number that does not appear in the gutter (e.g. a line you inferred from surrounding code but the diff does not show, or a number outside any hunk) — such a citation cannot be posted and will be dropped. When a finding concerns removed code or code just outside a hunk, anchor it to the nearest line that does carry a gutter number.
+
 Review the diff according to the following guidelines:
 
 - Repo specific review instructions found in AGENTS.md files.

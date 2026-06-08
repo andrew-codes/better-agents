@@ -30,8 +30,16 @@ Post **one** review with `create_pull_request_review` that carries everything in
 
 Pass `commit_id` (the PR head SHA, available from `get_pull_request`) if the review fails to anchor without it. Use `add_issue_comment` only for content that genuinely has no file/line home — never as the default way to post findings.
 
+**This call is all-or-nothing: if any single inline comment cannot be anchored, GitHub rejects the entire review.** A finding may cite a line that is not part of the diff (a reviewer mistake). Guard against losing the whole review:
+
+- If `create_pull_request_review` fails with a validation error (e.g. "line must be part of the diff", or an HTTP 422), read which file/line the error names, **remove that finding from `comments`**, append its text to the review `body` (clearly attributed to its file and line), and **retry** the call.
+- Repeat until the review posts. In the worst case every finding ends up in the `body` — that still delivers all the feedback and the correct verdict, which is far better than posting nothing.
+- Never drop a finding entirely to make the call succeed; demote it to the body instead.
+
 ### Bitbucket
 
 Post the Summary as a general PR comment with `addPullRequestComment` (no `inline`). Post **each located finding as its own `addPullRequestComment` call** with `inline` set to `{ path, to }`, where `path` is the cited file and `to` is the cited new-side line. Bitbucket exposes no request-changes verdict here, so when the verdict is request-changes, say so explicitly at the top of the summary comment (e.g. "Requesting changes — see the blocking findings below").
+
+Each finding is its own call, so a bad anchor only affects that one comment — not the whole review. If an inline `addPullRequestComment` fails because its line is not part of the diff, **re-post that same finding as a general comment** (no `inline`, with the file and line named in the text) so the feedback is never lost.
 
 Use only the tools provided. Do not edit code, push commits, or merge the PR — only post the review feedback. When done, briefly confirm what you posted: the verdict, how many inline comments you placed, and the URL of the created review/comment if a tool returns one.
