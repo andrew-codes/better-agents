@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { RunnableConfig } from "@langchain/core/runnables";
 import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
@@ -28,6 +28,12 @@ const MAX_REVISION_ROUNDS = 10;
 interface ReviewResult {
   branch: string;
   pr: PrDetails | null;
+  /**
+   * Set when the workflow stopped early (no PR found, or local commits not yet
+   * pushed) instead of running the review. Empty when the workflow ran to
+   * completion.
+   */
+  stopReason: string;
   /** Local unified diff produced by `git diff` (never fetched from the host). */
   diff: string;
   baseRef: string;
@@ -78,6 +84,8 @@ const ReviewState = Annotation.Root({
   /** Repo coordinates parsed from the local git remote, or null when unavailable. */
   repo: Annotation<RepoCoordinates | null>,
   pr: Annotation<PrDetails | null>,
+  /** Set when the workflow stops early; routes every gated edge straight to END. */
+  stopReason: Annotation<string>,
   diff: Annotation<string>,
   baseRef: Annotation<string>,
   review: Annotation<string>,
@@ -116,14 +124,20 @@ interface PrReviewer {
  * delegated to a dedicated sub-agent.
  *
  *   detectBranch (git)
- *     -> identifyPr (pr-identification)   # PR metadata only, no diff
- *     -> computeDiff (git)                # local `git diff`
- *     -> reviewCode (code-reviewer)       # comprehensive review of the diff
- *     -> annotateReview (plannotator)     # human review/revise/approve loop
- *     -> publishFeedback (pr-review-feedback-publisher)  # only when approved
+ *     -> fetchRemote (git)                 # bring origin/<branch> & origin/<default> up to date
+ *     -> checkLocalAhead (git)             # stop if local has unpushed commits
+ *     -> identifyPr (pr-identification)    # PR metadata only, no diff; stop if none found
+ *     -> computeDiff (git)                 # local `git diff` against remote-tracking refs
+ *     -> reviewCode (code-reviewer)        # comprehensive review of the diff
+ *     -> annotateReview (plannotator)      # human review/revise/approve loop
+ *     -> publishFeedback (pr-review-feedback-publisher)  # only when approved; deletes the review file after
  *
  * The PR's code diff is always produced locally via the git sub-agent — the
  * pr-identification sub-agent only returns PR metadata.
+ *
+ * `fetchRemote`, `checkLocalAhead`, and `identifyPr` can each set `stopReason`
+ * on the state, in which case the workflow ends immediately without reviewing:
+ * no PR for the branch, or local commits that haven't been pushed.
  */
 async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
   const subAgents = config.config?.subAgents;
@@ -174,29 +188,69 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
     return { branch, repo };
   };
 
+  // Bring the remote-tracking refs for the current branch and the default
+  // branch up to date before anything else runs, so the ahead-check and the
+  // diff both compare against what's actually on the remote — not whatever a
+  // stale `origin/*` ref happened to point to last time something fetched.
+  const fetchRemote = async (state: typeof ReviewState.State) => {
+    await emit({ type: "step", step: "fetchRemote", label: "Fetching latest from remote" });
+    if (!state.repo) {
+      return {};
+    }
+    const remoteDefault = (await gitSubAgent.defaultBranch()).trim() || "main";
+    const refs = Array.from(new Set([state.branch, remoteDefault].filter(Boolean)));
+    await gitSubAgent.fetchRefs(refs);
+    return {};
+  };
+
+  // A review can only reflect commits that have been pushed. If the local
+  // branch holds commits the remote doesn't have, the PR (and the diff we'd
+  // compute) wouldn't match what the human is sitting on — stop and say so.
+  const checkLocalAhead = async (state: typeof ReviewState.State) => {
+    await emit({ type: "step", step: "checkLocalAhead", label: "Checking for unpushed commits" });
+    if (!state.repo) {
+      return {};
+    }
+    const remoteBranch = `origin/${state.branch}`;
+    const ahead = await gitSubAgent.aheadCount(state.branch, remoteBranch);
+    if (ahead) {
+      return {
+        stopReason:
+          `Your local branch "${state.branch}" is ${ahead} commit${ahead === 1 ? "" : "s"} ` +
+          `ahead of "${remoteBranch}". Push your local commits first — the pull request ` +
+          "(and this review) can only reflect what's been pushed.",
+      };
+    }
+    return {};
+  };
+
   const identifyPr = async (state: typeof ReviewState.State) => {
     await emit({ type: "step", step: "identifyPr", label: "Identifying pull request" });
-    // Without repo coordinates we cannot scope the lookup; skip identification
-    // (the diff is still computed locally) rather than search across repos.
-    if (!state.repo) {
-      return { pr: null };
+    // Without repo coordinates we cannot scope the lookup, so no PR can be found.
+    const pr = state.repo
+      ? await prSubAgent.identifyPr(state.branch, state.repo, reactConfig)
+      : null;
+    if (!pr) {
+      return {
+        pr: null,
+        stopReason: `No open pull request was found for branch "${state.branch}". Open one and try again.`,
+      };
     }
-    const pr = await prSubAgent.identifyPr(state.branch, state.repo, reactConfig);
     return { pr };
   };
 
   const computeDiff = async (state: typeof ReviewState.State) => {
     await emit({ type: "step", step: "computeDiff", label: "Computing diff" });
-    // Prefer the PR's target branch; otherwise detect the repo's default branch.
+    // The diff must reflect what's actually on the remote — i.e. what the PR
+    // contains — not local refs that may be stale relative to `origin`.
     // Deterministic git operations run the CLI directly — the (potentially huge)
     // diff must never be fed back through a model just to be read, which would
     // overflow the context window. Generated lockfiles and Yarn PnP artifacts
     // are excluded by `diff` itself.
-    let base = state.pr?.targetBranch;
-    if (!base) {
-      base = (await gitSubAgent.defaultBranch()).trim() || "main";
-    }
-    const head = state.pr?.sourceBranch ?? state.branch;
+    const baseName = state.pr?.targetBranch || (await gitSubAgent.defaultBranch()).trim() || "main";
+    const headName = state.pr?.sourceBranch || state.branch;
+    const base = `origin/${baseName}`;
+    const head = `origin/${headName}`;
     const diff = await gitSubAgent.diff({ base, head });
     return { diff, baseRef: base };
   };
@@ -249,18 +303,23 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
     return { review, reviewPath: path, approved: false };
   };
 
+  // Reaching this node requires an approved review, which in turn requires a
+  // PR (identifyPr stops the workflow otherwise) — `state.pr` is always set.
   const publishFeedback = async (state: typeof ReviewState.State) => {
     await emit({ type: "step", step: "publishFeedback", label: "Publishing feedback" });
-    if (!state.pr) {
-      return { published: "" };
-    }
+    const pr = state.pr as PrDetails;
     const published = await publisherSubAgent.publish(
       {
         reviewFilePath: state.reviewPath,
-        target: { number: state.pr.number, url: state.pr.url, title: state.pr.title },
+        target: { number: pr.number, url: pr.url, title: pr.title },
       },
       reactConfig,
     );
+    // The review file only exists to drive the human review/annotate gate;
+    // once its contents have been posted to the PR, remove it from disk.
+    if (state.reviewPath) {
+      await rm(state.reviewPath, { force: true });
+    }
     return { published };
   };
 
@@ -268,16 +327,36 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
   const afterAnnotate = (state: typeof ReviewState.State) =>
     state.approved ? "publishFeedback" : END;
 
+  // Routes a gated step to `next` unless the workflow has already decided to
+  // stop (no PR found, or local commits not yet pushed) — then straight to END.
+  const stopGate =
+    (next: string) =>
+    (state: typeof ReviewState.State): string =>
+      state.stopReason ? END : next;
+
   const graph = new StateGraph(ReviewState)
     .addNode("detectBranch", detectBranch)
+    .addNode("fetchRemote", fetchRemote)
+    .addNode("checkLocalAhead", checkLocalAhead)
     .addNode("identifyPr", identifyPr)
     .addNode("computeDiff", computeDiff)
     .addNode("reviewCode", reviewCode)
     .addNode("annotateReview", annotateReview)
     .addNode("publishFeedback", publishFeedback)
     .addEdge(START, "detectBranch")
-    .addEdge("detectBranch", "identifyPr")
-    .addEdge("identifyPr", "computeDiff")
+    .addEdge("detectBranch", "fetchRemote")
+    .addConditionalEdges("fetchRemote", stopGate("checkLocalAhead"), {
+      checkLocalAhead: "checkLocalAhead",
+      [END]: END,
+    })
+    .addConditionalEdges("checkLocalAhead", stopGate("identifyPr"), {
+      identifyPr: "identifyPr",
+      [END]: END,
+    })
+    .addConditionalEdges("identifyPr", stopGate("computeDiff"), {
+      computeDiff: "computeDiff",
+      [END]: END,
+    })
     .addEdge("computeDiff", "reviewCode")
     .addEdge("reviewCode", "annotateReview")
     .addConditionalEdges("annotateReview", afterAnnotate, {
@@ -295,6 +374,7 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
           branch: "",
           repo: null,
           pr: null,
+          stopReason: "",
           diff: "",
           baseRef: "",
           review: "",
@@ -305,6 +385,7 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
         return {
           branch: final.branch,
           pr: final.pr,
+          stopReason: final.stopReason,
           diff: final.diff,
           baseRef: final.baseRef,
           review: final.review,

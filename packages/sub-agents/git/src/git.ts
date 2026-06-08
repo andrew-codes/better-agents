@@ -118,6 +118,30 @@ async function mergeBase(ref: string, base: string, ctx?: GitContext): Promise<s
   return runGit(["merge-base", base, ref], ctx);
 }
 
+/** Fetch the given refs from a remote (defaults to `origin`) so remote-tracking refs are current. */
+async function fetchRefs(
+  refs: readonly string[],
+  remote = "origin",
+  ctx?: GitContext,
+): Promise<void> {
+  if (!refs.length) return;
+  await runGit(["fetch", remote, ...refs], ctx);
+}
+
+/**
+ * Count commits reachable from `ref` but not from `base` — how far `ref` is
+ * ahead of `base`. Returns `null` when the comparison can't be made, e.g.
+ * `base` doesn't exist (a branch that has never been pushed to the remote).
+ */
+async function aheadCount(ref: string, base: string, ctx?: GitContext): Promise<number | null> {
+  try {
+    const out = await runGit(["rev-list", "--count", `${base}..${ref}`], ctx);
+    return parseInt(out, 10) || 0;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Detect the repository's default branch.
  *
@@ -142,4 +166,14 @@ async function defaultBranch(ctx?: GitContext): Promise<string> {
 }
 
 export type { DiffOptions, GitContext };
-export { DEFAULT_DIFF_EXCLUDES, currentBranch, defaultBranch, diff, mergeBase, remoteUrl, runGit };
+export {
+  DEFAULT_DIFF_EXCLUDES,
+  aheadCount,
+  currentBranch,
+  defaultBranch,
+  diff,
+  fetchRefs,
+  mergeBase,
+  remoteUrl,
+  runGit,
+};

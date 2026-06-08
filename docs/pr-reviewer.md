@@ -4,14 +4,16 @@ PR Reviewer reviews the pull request open for your current git branch, then walk
 
 ## How it works
 
-1. **Finds your PR.** It detects the branch you're on and looks up the matching pull request (just the metadata — title, description, target branch — not the diff).
-2. **Computes the diff locally.** It runs `git diff` against the PR's target branch (or your repository's default branch if there's no open PR), so your code never has to be fetched from the hosting provider to be reviewed.
-3. **Reviews the code.** It produces a written review covering correctness, missing tests/error handling, security, and performance — tailored by any principles and tone you've configured (see below).
-4. **Hands the review to you.** The review opens in an interactive annotation view where you can:
+1. **Syncs with the remote.** It detects the branch you're on and fetches it, along with your repository's default branch, from `origin` — so every check that follows compares against the remote's current state, not stale local refs.
+2. **Checks you're pushed up.** If your local branch has commits that aren't on `origin/<branch>`, it stops and asks you to push first — a review can only reflect what's actually in the pull request.
+3. **Finds your PR.** It looks up the matching pull request (just the metadata — title, description, target branch — not the diff). If none is open for your branch, it stops here and lets you know.
+4. **Computes the diff locally.** It runs `git diff` between the remote-tracking refs for the PR's source and target branches, so your code never has to be fetched from the hosting provider to be reviewed.
+5. **Reviews the code.** It produces a written review covering correctness, missing tests/error handling, security, and performance — tailored by any principles and tone you've configured (see below).
+6. **Hands the review to you.** The review opens in an interactive annotation view where you can:
    - **Approve** it as-is, or
    - **Annotate** it with your own comments — the agent revises the review based on your feedback and presents the updated version (this can repeat until you're happy), or
    - **Dismiss** it — nothing gets posted.
-5. **Publishes your feedback.** Once you approve, the review is posted as feedback on the pull request. If there's no open PR, nothing is published.
+7. **Publishes your feedback.** Once you approve, the review is posted as feedback on the pull request, and the local review file is deleted.
 
 ## Requirements
 
