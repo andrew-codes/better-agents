@@ -40,12 +40,15 @@ function parseDecision(stdout: string): DecisionJson | null {
 
 /**
  * Open a plannotator annotation session on `file` and block until the human
- * resolves it. Uses the `annotate --json` gate so the decision is machine
- * readable. A dismissed/unparseable session is treated as "dismissed" (the
- * caller stops the workflow rather than publishing).
+ * resolves it. The `--gate` flag puts the UI into approval-gate mode so the
+ * human gets explicit Approve / Request-changes controls (without it the page
+ * only offers a Close button and can never produce an "approved" decision).
+ * `--json` makes the resulting decision machine readable. A dismissed or
+ * unparseable session is treated as "dismissed" (the caller stops the workflow
+ * rather than publishing).
  */
 async function annotate(file: string): Promise<AnnotateOutcome> {
-  const { stdout } = await execFileAsync("plannotator", ["annotate", file, "--json"], {
+  const { stdout } = await execFileAsync("plannotator", ["annotate", file, "--gate", "--json"], {
     maxBuffer: MAX_BUFFER,
   });
 
