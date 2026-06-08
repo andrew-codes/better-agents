@@ -1,4 +1,5 @@
 import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
+import type { RunnableConfig } from "@langchain/core/runnables";
 import type { StructuredToolInterface } from "@langchain/core/tools";
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
 import { createAgent } from "langchain";
@@ -44,9 +45,10 @@ interface PrIdentificationSubAgent {
   /**
    * Identify the open PR whose source branch matches `branch` and return its
    * details. The code diff is never fetched here — it is computed locally by
-   * the top-level agent via `git diff`.
+   * the top-level agent via `git diff`. `config` is forwarded to the underlying
+   * ReAct agent (e.g. to attach callbacks for progress reporting).
    */
-  identifyPr(branch: string): Promise<PrDetails | null>;
+  identifyPr(branch: string, config?: RunnableConfig): Promise<PrDetails | null>;
   /** Disconnect the underlying MCP server subprocess. */
   close(): Promise<void>;
 }
@@ -86,7 +88,7 @@ async function createPrIdentificationSubAgent(
   });
 
   return {
-    async identifyPr(branch: string) {
+    async identifyPr(branch: string, config?: RunnableConfig) {
       const task =
         `Find the open ${options.provider.type} pull request whose source ` +
         `(head) branch is exactly "${branch}". Use only the available tools ` +
@@ -95,9 +97,12 @@ async function createPrIdentificationSubAgent(
         `Return the details of the identified pull request; do not include ` +
         `any code diff or file contents in the response.`;
 
-      const result = await agent.invoke({
-        messages: [{ role: "user", content: task }],
-      });
+      const result = await agent.invoke(
+        {
+          messages: [{ role: "user", content: task }],
+        },
+        config,
+      );
 
       const structured = (result.structuredResponse ?? undefined) as PrDetails | undefined;
       return structured ?? null;

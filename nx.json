@@ -30,5 +30,6 @@
       "inputs": ["default", "^default"],
       "cache": true
     }
-  }
+  },
+  "analytics": true
 }

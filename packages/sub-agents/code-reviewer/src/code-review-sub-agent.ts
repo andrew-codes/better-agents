@@ -48,6 +48,13 @@ interface CodeReviewInput {
     priorReview: string;
     feedback: string;
   };
+  /**
+   * Optional sink for the model's live output. When supplied, the review is
+   * generated via streaming and each reasoning/text delta is reported as it
+   * arrives, letting the orchestrator surface the reviewer's "thinking state"
+   * to the user. The full review is still returned when the stream completes.
+   */
+  onThought?: (delta: string) => void | Promise<void>;
 }
 
 interface CodeReviewSubAgent {
@@ -89,6 +96,28 @@ function contentToString(content: MessageContent): string {
   return content
     .map((part) => (typeof part === "string" ? part : "text" in part ? part.text : ""))
     .join("");
+}
+
+/**
+ * Split a streamed chunk's content into its visible text and its reasoning
+ * ("thinking") deltas. Anthropic streams extended-thinking blocks as
+ * `{ type: "thinking", thinking }` parts and answer tokens as
+ * `{ type: "text", text }` parts; plain string content is treated as text.
+ */
+function splitChunk(content: MessageContent): { text: string; thinking: string } {
+  if (typeof content === "string") return { text: content, thinking: "" };
+  let text = "";
+  let thinking = "";
+  for (const part of content) {
+    if (typeof part === "string") {
+      text += part;
+    } else if (part.type === "thinking" && "thinking" in part) {
+      thinking += (part as { thinking?: string }).thinking ?? "";
+    } else if ("text" in part) {
+      text += part.text ?? "";
+    }
+  }
+  return { text, thinking };
 }
 
 /** Build the human-message task for an initial review. */
@@ -145,11 +174,31 @@ function createCodeReviewSubAgent(options: CodeReviewSubAgentOptions = {}): Code
   return {
     async review(input: CodeReviewInput) {
       const task = input.revision ? revisionTask(input) : reviewTask(input);
-      const result = await model.invoke([
+      const messages = [
         { role: "system", content: systemPrompt },
         { role: "user", content: task },
-      ]);
-      return contentToString(result.content).trim();
+      ];
+
+      // Without a thought sink, a single blocking call is simplest.
+      if (!input.onThought) {
+        const result = await model.invoke(messages);
+        return contentToString(result.content).trim();
+      }
+
+      // With a thought sink, stream so the reviewer's progress is observable.
+      // Reasoning deltas and answer deltas are both reported; only the answer
+      // text is accumulated into the returned review.
+      let review = "";
+      const stream = await model.stream(messages);
+      for await (const chunk of stream) {
+        const { text, thinking } = splitChunk(chunk.content);
+        if (thinking) await input.onThought(thinking);
+        if (text) {
+          review += text;
+          await input.onThought(text);
+        }
+      }
+      return review.trim();
     },
   };
 }

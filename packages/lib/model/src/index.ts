@@ -32,12 +32,15 @@ function resolveModel(config: ModelConfig | undefined): BaseChatModel | undefine
 
   const { name, ...options } = config;
 
+  // Stream by default so callers using token-level callbacks (see
+  // createThoughtCallback) get live output even from `.invoke()`. A `streaming`
+  // key under `model` in config.yml overrides this.
   if (isOpenAi(name)) {
-    return new ChatOpenAI({ model: name, ...options });
+    return new ChatOpenAI({ model: name, streaming: true, ...options });
   }
 
   const model = ANTHROPIC_ALIASES[name] ?? name;
-  return new ChatAnthropic({ model, ...options });
+  return new ChatAnthropic({ model, streaming: true, ...options });
 }
 
 /**
@@ -53,3 +56,5 @@ function resolveModelOrDefault(
 
 export type { ModelConfig };
 export { DEFAULT_MODEL_NAME, resolveModel, resolveModelOrDefault };
+export type { ThoughtSink } from "./thought-callback.js";
+export { ThoughtCallbackHandler, createThoughtCallback } from "./thought-callback.js";

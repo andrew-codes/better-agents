@@ -1,9 +1,10 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { BaseMessage } from "@langchain/core/messages";
+import type { RunnableConfig } from "@langchain/core/runnables";
 import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
 import type { ProviderConfig } from "@andrew-codes/better-agents-pkg-types-git-provider";
-import { resolveModel } from "@andrew-codes/better-agents-pkg-model";
+import { createThoughtCallback, resolveModel } from "@andrew-codes/better-agents-pkg-model";
 import {
   createCodeReviewSubAgent,
   type CodeReviewSubAgent,
@@ -94,9 +95,27 @@ const ReviewState = Annotation.Root({
   published: Annotation<string>,
 });
 
+/**
+ * Progress emitted while a review runs, so callers (e.g. the ACP layer) can
+ * surface what the agent is doing and its live reasoning.
+ *
+ *  - `step`: a workflow stage has begun — the "what step it is on" signal.
+ *  - `thought`: a streamed reasoning/output delta — the "thinking state" signal.
+ */
+type ReviewEvent =
+  | { type: "step"; step: string; label: string }
+  | { type: "thought"; text: string };
+
+/** Sink for {@link ReviewEvent}s; awaited so updates flush in order. */
+type ReviewEventHandler = (event: ReviewEvent) => void | Promise<void>;
+
 interface PrReviewer {
-  /** Run the workflow against the current branch and return the gathered context. */
-  review(): Promise<ReviewResult>;
+  /**
+   * Run the workflow against the current branch and return the gathered
+   * context. When `onEvent` is supplied, step and thinking-state updates are
+   * reported as the workflow progresses.
+   */
+  review(onEvent?: ReviewEventHandler): Promise<ReviewResult>;
   /** Tear down sub-agent resources (MCP subprocesses). */
   close(): Promise<void>;
 }
@@ -141,57 +160,82 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
     repoRoot: process.cwd(),
   });
 
+  // Set per-`review()` call; nodes report progress through it. Defaults to a
+  // no-op so the workflow runs unchanged when no handler is supplied.
+  let emit: ReviewEventHandler = () => {};
+
+  // Forwards the ReAct sub-agents' streamed reasoning and tool activity as
+  // thought events. The handler closes over `emit`, so it always targets the
+  // current review's handler. Passed via each sub-agent invocation's config.
+  const reactConfig: RunnableConfig = {
+    callbacks: [createThoughtCallback((text) => emit({ type: "thought", text }))],
+  };
+
   const detectBranch = async () => {
-    const res = await gitSubAgent.invoke({
-      messages: [
-        {
-          role: "user",
-          content: "Determine the current git branch using your tools and report only its name.",
-        },
-      ],
-    });
+    await emit({ type: "step", step: "detectBranch", label: "Detecting current branch" });
+    const res = await gitSubAgent.invoke(
+      {
+        messages: [
+          {
+            role: "user",
+            content: "Determine the current git branch using your tools and report only its name.",
+          },
+        ],
+      },
+      reactConfig,
+    );
     const branch = (toolOutput(res, "git_current_branch") ?? "").trim();
     return { branch };
   };
 
   const identifyPr = async (state: typeof ReviewState.State) => {
-    const pr = await prSubAgent.identifyPr(state.branch);
+    await emit({ type: "step", step: "identifyPr", label: "Identifying pull request" });
+    const pr = await prSubAgent.identifyPr(state.branch, reactConfig);
     return { pr };
   };
 
   const computeDiff = async (state: typeof ReviewState.State) => {
+    await emit({ type: "step", step: "computeDiff", label: "Computing diff" });
     // Prefer the PR's target branch; otherwise detect the repo's default branch.
     let base = state.pr?.targetBranch;
     if (!base) {
-      const detect = await gitSubAgent.invoke({
-        messages: [
-          {
-            role: "user",
-            content:
-              "Determine the repository's default branch using your tools and report only its name.",
-          },
-        ],
-      });
+      const detect = await gitSubAgent.invoke(
+        {
+          messages: [
+            {
+              role: "user",
+              content:
+                "Determine the repository's default branch using your tools and report only its name.",
+            },
+          ],
+        },
+        reactConfig,
+      );
       base = (toolOutput(detect, "git_default_branch") ?? "").trim() || "main";
     }
     const head = state.pr?.sourceBranch ?? state.branch;
-    const res = await gitSubAgent.invoke({
-      messages: [
-        {
-          role: "user",
-          content: `Produce the unified diff for the range ${base}...${head} using your tools.`,
-        },
-      ],
-    });
+    const res = await gitSubAgent.invoke(
+      {
+        messages: [
+          {
+            role: "user",
+            content: `Produce the unified diff for the range ${base}...${head} using your tools.`,
+          },
+        ],
+      },
+      reactConfig,
+    );
     return { diff: toolOutput(res, "git_diff") ?? "", baseRef: base };
   };
 
   const reviewCode = async (state: typeof ReviewState.State) => {
+    await emit({ type: "step", step: "reviewCode", label: "Reviewing code" });
     const review = await codeReviewSubAgent.review({
       diff: state.diff,
       title: state.pr?.title,
       description: state.pr?.description,
       baseRef: state.baseRef,
+      onThought: (text) => emit({ type: "thought", text }),
     });
     return { review };
   };
@@ -200,6 +244,7 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
   // On "annotated" feedback the code-reviewer revises and we re-present; on
   // "approved" we stop with the approved file; on "dismissed" we stop unpublished.
   const annotateReview = async (state: typeof ReviewState.State) => {
+    await emit({ type: "step", step: "annotateReview", label: "Awaiting human review" });
     const path = reviewFilePath(state);
     await mkdir(dirname(path), { recursive: true });
 
@@ -215,12 +260,14 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
         return { review, reviewPath: path, approved: false };
       }
       // "annotated": revise to address the human feedback, then re-present.
+      await emit({ type: "step", step: "reviseReview", label: "Revising review" });
       review = await codeReviewSubAgent.review({
         diff: state.diff,
         title: state.pr?.title,
         description: state.pr?.description,
         baseRef: state.baseRef,
         revision: { priorReview: review, feedback: outcome.feedback },
+        onThought: (text) => emit({ type: "thought", text }),
       });
     }
 
@@ -230,13 +277,17 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
   };
 
   const publishFeedback = async (state: typeof ReviewState.State) => {
+    await emit({ type: "step", step: "publishFeedback", label: "Publishing feedback" });
     if (!state.pr) {
       return { published: "" };
     }
-    const published = await publisherSubAgent.publish({
-      reviewFilePath: state.reviewPath,
-      target: { number: state.pr.number, url: state.pr.url, title: state.pr.title },
-    });
+    const published = await publisherSubAgent.publish(
+      {
+        reviewFilePath: state.reviewPath,
+        target: { number: state.pr.number, url: state.pr.url, title: state.pr.title },
+      },
+      reactConfig,
+    );
     return { published };
   };
 
@@ -264,27 +315,32 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
     .compile();
 
   return {
-    async review() {
-      const final = await graph.invoke({
-        branch: "",
-        pr: null,
-        diff: "",
-        baseRef: "",
-        review: "",
-        reviewPath: "",
-        approved: false,
-        published: "",
-      });
-      return {
-        branch: final.branch,
-        pr: final.pr,
-        diff: final.diff,
-        baseRef: final.baseRef,
-        review: final.review,
-        reviewPath: final.reviewPath,
-        approved: final.approved,
-        published: final.published,
-      };
+    async review(onEvent?: ReviewEventHandler) {
+      emit = onEvent ?? (() => {});
+      try {
+        const final = await graph.invoke({
+          branch: "",
+          pr: null,
+          diff: "",
+          baseRef: "",
+          review: "",
+          reviewPath: "",
+          approved: false,
+          published: "",
+        });
+        return {
+          branch: final.branch,
+          pr: final.pr,
+          diff: final.diff,
+          baseRef: final.baseRef,
+          review: final.review,
+          reviewPath: final.reviewPath,
+          approved: final.approved,
+          published: final.published,
+        };
+      } finally {
+        emit = () => {};
+      }
     },
     async close() {
       await gitSubAgent.close();
@@ -294,5 +350,5 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
   };
 }
 
-export type { PrReviewer, ReviewResult };
+export type { PrReviewer, ReviewEvent, ReviewEventHandler, ReviewResult };
 export { createPrReviewer };

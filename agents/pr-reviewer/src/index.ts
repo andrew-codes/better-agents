@@ -82,12 +82,29 @@ class PrReviewerAgent implements Agent {
 
     const reviewer = await createPrReviewer(config);
     try {
-      const result = await reviewer.review();
+      // Stream progress as the workflow runs: each step becomes a visible
+      // message line and the reviewer's live reasoning becomes a thought chunk,
+      // so the client (e.g. Zed) shows activity instead of a blank turn.
+      const result = await reviewer.review(async (event) => {
+        await this.conn.sessionUpdate({
+          sessionId: params.sessionId,
+          update:
+            event.type === "step"
+              ? {
+                  sessionUpdate: "agent_message_chunk",
+                  content: { type: "text", text: `\n### ${event.label}\n` },
+                }
+              : {
+                  sessionUpdate: "agent_thought_chunk",
+                  content: { type: "text", text: event.text },
+                },
+        });
+      });
       await this.conn.sessionUpdate({
         sessionId: params.sessionId,
         update: {
           sessionUpdate: "agent_message_chunk",
-          content: { type: "text", text: summarize(result) },
+          content: { type: "text", text: `\n${summarize(result)}` },
         },
       });
       return { stopReason: "end_turn" };

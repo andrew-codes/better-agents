@@ -1,4 +1,5 @@
 import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
+import type { RunnableConfig } from "@langchain/core/runnables";
 import type { StructuredToolInterface } from "@langchain/core/tools";
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
 import { createAgent } from "langchain";
@@ -63,8 +64,13 @@ interface FeedbackPublisherSubAgent {
   /**
    * Read the approved review at `reviewFilePath` and post it to `target` as a
    * review comment on the pull request. Returns the agent's final message.
+   * `config` is forwarded to the underlying ReAct agent (e.g. to attach
+   * callbacks for progress reporting).
    */
-  publish(input: { reviewFilePath: string; target: PublishTarget }): Promise<string>;
+  publish(
+    input: { reviewFilePath: string; target: PublishTarget },
+    config?: RunnableConfig,
+  ): Promise<string>;
   /** Disconnect the underlying MCP server subprocess. */
   close(): Promise<void>;
 }
@@ -125,7 +131,7 @@ async function createFeedbackPublisherSubAgent(
   });
 
   return {
-    async publish({ reviewFilePath, target }) {
+    async publish({ reviewFilePath, target }, config?: RunnableConfig) {
       const task =
         `Publish the approved code review to the ${options.provider.type} pull ` +
         `request #${target.number} (${target.url}).\n` +
@@ -135,9 +141,12 @@ async function createFeedbackPublisherSubAgent(
         `as a single review comment using the provider's tools. Derive the ` +
         `repository owner/name (or workspace/repo) from the PR URL.`;
 
-      const result = await agent.invoke({
-        messages: [{ role: "user", content: task }],
-      });
+      const result = await agent.invoke(
+        {
+          messages: [{ role: "user", content: task }],
+        },
+        config,
+      );
       return finalText(result as { messages: Array<{ content: unknown }> });
     },
     async close() {
