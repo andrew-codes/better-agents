@@ -26,6 +26,11 @@ async function currentBranch(ctx?: GitContext): Promise<string> {
   return runGit(["rev-parse", "--abbrev-ref", "HEAD"], ctx);
 }
 
+/** Return the fetch URL of a remote (defaults to `origin`). */
+async function remoteUrl(remote = "origin", ctx?: GitContext): Promise<string> {
+  return runGit(["remote", "get-url", remote], ctx);
+}
+
 async function mergeBase(ref: string, base: string, ctx?: GitContext): Promise<string> {
   return runGit(["merge-base", base, ref], ctx);
 }
@@ -54,4 +59,4 @@ async function defaultBranch(ctx?: GitContext): Promise<string> {
 }
 
 export type { GitContext };
-export { currentBranch, defaultBranch, mergeBase, runGit };
+export { currentBranch, defaultBranch, mergeBase, remoteUrl, runGit };

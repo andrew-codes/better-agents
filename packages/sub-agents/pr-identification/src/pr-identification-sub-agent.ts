@@ -9,19 +9,20 @@ import { scopeTools, type McpServerSpec } from "@andrew-codes/better-agents-pkg-
 import { resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
 import type { ProviderConfig } from "@andrew-codes/better-agents-pkg-types-git-provider";
 import systemPrompt from "./prompt.md";
-import { prDetailsSchema, type PrDetails } from "./types.js";
+import { prDetailsSchema, type PrDetails, type RepoCoordinates } from "./types.js";
 
 /** Default model name for the PR-identification sub-agent. Overridable via config. */
 const DEFAULT_MODEL = "haiku-4.5";
 
 /**
- * Read-only PR/repo metadata tools to expose. No tool that returns file
- * contents or diffs is allowlisted — the diff is computed locally by the
- * top-level agent via `git diff`.
+ * Read-only PR metadata tools to expose. The repository is supplied directly
+ * by the caller (parsed from the local git remote), so no repository-search
+ * tool is needed. No tool that returns file contents or diffs is allowlisted —
+ * the diff is computed locally by the top-level agent via `git diff`.
  */
 const ALLOWED_TOOLS: Record<ProviderConfig["type"], string[]> = {
-  github: ["list_pull_requests", "get_pull_request", "search_repositories"],
-  bitbucket: ["getPullRequests", "getPullRequest", "getRepository"],
+  github: ["list_pull_requests", "get_pull_request"],
+  bitbucket: ["getPullRequests", "getPullRequest"],
 };
 
 /** Build the MCP server spec for the configured provider, scoped to `ALLOWED_TOOLS`. */
@@ -43,12 +44,18 @@ interface PrIdentificationOptions {
 
 interface PrIdentificationSubAgent {
   /**
-   * Identify the open PR whose source branch matches `branch` and return its
-   * details. The code diff is never fetched here — it is computed locally by
-   * the top-level agent via `git diff`. `config` is forwarded to the underlying
+   * Identify the open PR in `repo` whose source branch matches `branch` and
+   * return its details. The repository is supplied by the caller (parsed from
+   * the local git remote), so the sub-agent never searches across repositories.
+   * The code diff is never fetched here — it is computed locally by the
+   * top-level agent via `git diff`. `config` is forwarded to the underlying
    * ReAct agent (e.g. to attach callbacks for progress reporting).
    */
-  identifyPr(branch: string, config?: RunnableConfig): Promise<PrDetails | null>;
+  identifyPr(
+    branch: string,
+    repo: RepoCoordinates,
+    config?: RunnableConfig,
+  ): Promise<PrDetails | null>;
   /** Disconnect the underlying MCP server subprocess. */
   close(): Promise<void>;
 }
@@ -88,14 +95,16 @@ async function createPrIdentificationSubAgent(
   });
 
   return {
-    async identifyPr(branch: string, config?: RunnableConfig) {
+    async identifyPr(branch: string, repo: RepoCoordinates, config?: RunnableConfig) {
       const task =
-        `Find the open ${options.provider.type} pull request whose source ` +
-        `(head) branch is exactly "${branch}". Use only the available tools ` +
-        `to look up repository and pull request metadata. Do NOT fetch the ` +
-        `code diff or file contents. If no matching open PR exists, say so. ` +
-        `Return the details of the identified pull request; do not include ` +
-        `any code diff or file contents in the response.`;
+        `In the ${options.provider.type} repository "${repo.owner}/${repo.repo}", ` +
+        `find the open pull request whose source (head) branch is exactly ` +
+        `"${branch}". Use only the available tools to look up pull request ` +
+        `metadata for that repository — do NOT search across other ` +
+        `repositories. Do NOT fetch the code diff or file contents. If no ` +
+        `matching open PR exists, say so. Return the details of the identified ` +
+        `pull request; do not include any code diff or file contents in the ` +
+        `response.`;
 
       const result = await agent.invoke(
         {

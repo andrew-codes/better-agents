@@ -15,6 +15,7 @@ top-level agents that depend on it (no standalone build).
 | -------------------- | ------ | --------------------------------------------------------------------------------- |
 | `git_current_branch` | custom | Name of the checked-out branch                                                    |
 | `git_default_branch` | custom | Repo's default branch (from `origin/HEAD`, falling back to local `main`/`master`) |
+| `git_remote_url`     | custom | Fetch URL of a remote (defaults to `origin`)                                       |
 | `git_status`         | MCP    | Working-tree status                                                               |
 | `git_diff`           | custom | Unified diff (`base...head` range or working tree vs `base`)                      |
 | `git_log`            | custom | Commit log lines                                                                  |
@@ -22,6 +23,15 @@ top-level agents that depend on it (no standalone build).
 
 Custom tools run via `execFile("git", [...args])` — array-form arguments, never
 a shell — so caller input cannot inject shell metacharacters.
+
+## Remote parsing
+
+The package also exports `parseRepoSlug(url)`, which extracts the owner/repo
+(GitHub) or workspace/repo-slug (Bitbucket) from a git remote URL — both
+providers encode them as the final two path segments, across scp-like
+(`git@host:owner/repo.git`), `https://`, and `ssh://` shapes. Paired with
+`git_remote_url`, this lets an orchestrator scope a PR lookup to the exact
+repository without searching.
 
 ## MCP integration
 

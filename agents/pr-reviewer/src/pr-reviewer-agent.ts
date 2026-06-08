@@ -9,11 +9,12 @@ import {
   createCodeReviewSubAgent,
   type CodeReviewSubAgent,
 } from "@andrew-codes/better-agents-pkg-sub-agent-code-reviewer";
-import { createGitSubAgent } from "@andrew-codes/better-agents-pkg-sub-agent-git";
+import { createGitSubAgent, parseRepoSlug } from "@andrew-codes/better-agents-pkg-sub-agent-git";
 import {
   createPrIdentificationSubAgent,
   type PrDetails,
   type PrIdentificationSubAgent,
+  type RepoCoordinates,
 } from "@andrew-codes/better-agents-pkg-sub-agent-pr-identification";
 import {
   createFeedbackPublisherSubAgent,
@@ -86,6 +87,8 @@ function reviewFilePath(state: { pr: PrDetails | null; branch: string }): string
 
 const ReviewState = Annotation.Root({
   branch: Annotation<string>,
+  /** Repo coordinates parsed from the local git remote, or null when unavailable. */
+  repo: Annotation<RepoCoordinates | null>,
   pr: Annotation<PrDetails | null>,
   diff: Annotation<string>,
   baseRef: Annotation<string>,
@@ -171,6 +174,9 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
     callbacks: [createThoughtCallback((text) => emit({ type: "thought", text }))],
   };
 
+  // Detect both the current branch and the repo coordinates (parsed from the
+  // local git remote). The remote tells us exactly which repository to look the
+  // PR up in, so the pr-identification sub-agent never has to search.
   const detectBranch = async () => {
     await emit({ type: "step", step: "detectBranch", label: "Detecting current branch" });
     const res = await gitSubAgent.invoke(
@@ -178,19 +184,26 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
         messages: [
           {
             role: "user",
-            content: "Determine the current git branch using your tools and report only its name.",
+            content: "Report the current git branch and the 'origin' remote URL using your tools.",
           },
         ],
       },
       reactConfig,
     );
     const branch = (toolOutput(res, "git_current_branch") ?? "").trim();
-    return { branch };
+    const remote = (toolOutput(res, "git_remote_url") ?? "").trim();
+    const repo = remote ? parseRepoSlug(remote) : null;
+    return { branch, repo };
   };
 
   const identifyPr = async (state: typeof ReviewState.State) => {
     await emit({ type: "step", step: "identifyPr", label: "Identifying pull request" });
-    const pr = await prSubAgent.identifyPr(state.branch, reactConfig);
+    // Without repo coordinates we cannot scope the lookup; skip identification
+    // (the diff is still computed locally) rather than search across repos.
+    if (!state.repo) {
+      return { pr: null };
+    }
+    const pr = await prSubAgent.identifyPr(state.branch, state.repo, reactConfig);
     return { pr };
   };
 
@@ -320,6 +333,7 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
       try {
         const final = await graph.invoke({
           branch: "",
+          repo: null,
           pr: null,
           diff: "",
           baseRef: "",

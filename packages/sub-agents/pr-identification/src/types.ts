@@ -23,5 +23,16 @@ const prDetailsSchema = z.object({
 
 type PrDetails = z.infer<typeof prDetailsSchema>;
 
-export type { PrDetails };
+/**
+ * Repository coordinates the sub-agent scopes its lookup to, derived from the
+ * local git remote by the caller: the owning account/organisation (GitHub
+ * `owner`, Bitbucket `workspace`) and the repository name (GitHub `repo`,
+ * Bitbucket `repo_slug`).
+ */
+interface RepoCoordinates {
+  owner: string;
+  repo: string;
+}
+
+export type { PrDetails, RepoCoordinates };
 export { prDetailsSchema };

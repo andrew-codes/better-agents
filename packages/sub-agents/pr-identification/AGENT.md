@@ -1,8 +1,11 @@
 # sub-agent: pr-identification
 
 Reusable LangGraph ReAct sub-agent that **identifies the pull request to
-review** based on the current git branch and the configured git provider.
-Bundled into top-level agents that depend on it (no standalone build).
+review** based on the current git branch and the **repository coordinates the
+caller supplies** (owner/repo, parsed from the local git remote). Because the
+repository is given up front, the sub-agent never searches across
+repositories — it looks the PR up directly in the named repo. Bundled into
+top-level agents that depend on it (no standalone build).
 
 - **Package**: `@andrew-codes/better-agents-pkg-sub-agent-pr-identification` (private)
 - **Default model**: Anthropic Haiku 4.5 (`claude-haiku-4-5-20251001`). Overridable
@@ -29,14 +32,17 @@ diff is computed locally by the top-level agent via `git diff`.
 - MCP: `@modelcontextprotocol/server-github`
 - Auth: `GITHUB_TOKEN` (config.yml or env), mapped to the server's
   `GITHUB_PERSONAL_ACCESS_TOKEN`.
-- Allowlisted tools: `list_pull_requests`, `get_pull_request`, `search_repositories`.
+- Allowlisted tools: `list_pull_requests`, `get_pull_request`.
 
 ### Bitbucket
 
 - MCP: [`bitbucket-mcp`](https://www.npmjs.com/package/bitbucket-mcp)
 - Auth: `BITBUCKET_USERNAME`, `BITBUCKET_WORKSPACE`, `BITBUCKET_TOKEN`
   (config.yml or env).
-- Allowlisted tools: `getPullRequests`, `getPullRequest`, `getRepository`.
+- Allowlisted tools: `getPullRequests`, `getPullRequest`.
+
+  Bitbucket remote URLs encode `workspace/repo_slug` the same way GitHub encodes
+  `owner/repo`, so the caller-supplied coordinates work for both providers.
 
 ## Output
 
@@ -53,7 +59,12 @@ const sub = await createPrIdentificationSubAgent({
   provider: { type: "github", token: process.env.GITHUB_TOKEN! },
 });
 try {
-  const pr = await sub.identifyPr("feature/my-branch");
+  // `repo` is parsed from the local git remote by the caller — e.g. via
+  // `parseRepoSlug` from `@andrew-codes/better-agents-pkg-sub-agent-git`.
+  const pr = await sub.identifyPr("feature/my-branch", {
+    owner: "andrew-codes",
+    repo: "better-agents",
+  });
 } finally {
   await sub.close();
 }

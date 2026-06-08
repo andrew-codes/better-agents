@@ -1,6 +1,13 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
-import { currentBranch, defaultBranch, mergeBase, runGit, type GitContext } from "./git.js";
+import {
+  currentBranch,
+  defaultBranch,
+  mergeBase,
+  remoteUrl,
+  runGit,
+  type GitContext,
+} from "./git.js";
 
 /**
  * Build the set of read-oriented git tools the sub-agent is allowed to use.
@@ -19,6 +26,15 @@ function createGitTools(ctx: GitContext = {}) {
     description:
       "Return the repository's default branch (from origin/HEAD, falling back to a local main/master).",
     schema: z.object({}),
+  });
+
+  const gitRemoteUrl = tool(async ({ remote }) => remoteUrl(remote ?? "origin", ctx), {
+    name: "git_remote_url",
+    description:
+      "Return the fetch URL of a git remote (defaults to 'origin'). The owner/repo (workspace/repo-slug) can be parsed from the returned URL.",
+    schema: z.object({
+      remote: z.string().optional().describe("Remote name, defaults to 'origin'."),
+    }),
   });
 
   const gitDiff = tool(
@@ -77,7 +93,7 @@ function createGitTools(ctx: GitContext = {}) {
     }),
   });
 
-  return [gitCurrentBranch, gitDefaultBranch, gitDiff, gitLog, gitMergeBase];
+  return [gitCurrentBranch, gitDefaultBranch, gitRemoteUrl, gitDiff, gitLog, gitMergeBase];
 }
 
 export { createGitTools };
