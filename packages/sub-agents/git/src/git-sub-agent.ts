@@ -7,7 +7,14 @@ import { createAgent } from "langchain";
 import { gitMcp } from "@andrew-codes/better-agents-pkg-mcp-git";
 import { scopeTools } from "@andrew-codes/better-agents-pkg-mcp-utils";
 import { resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
-import type { GitContext } from "./git.js";
+import {
+  currentBranch,
+  defaultBranch,
+  diff,
+  remoteUrl,
+  type DiffOptions,
+  type GitContext,
+} from "./git.js";
 import systemPrompt from "./prompt.md";
 import { createGitTools } from "./tools.js";
 
@@ -41,51 +48,80 @@ interface GitSubAgent {
     input: { messages: BaseMessageLike[] },
     config?: RunnableConfig,
   ): Promise<{ messages: BaseMessage[] }>;
+  /**
+   * Deterministic git operations that run the git CLI directly, with no model
+   * round-trip. Preferred over {@link invoke} for the orchestrator's fixed
+   * steps — especially `diff`, whose (potentially large) output must never be
+   * fed back through a model just to be read.
+   */
+  currentBranch(): Promise<string>;
+  defaultBranch(): Promise<string>;
+  /** Fetch URL of a git remote (defaults to 'origin'). */
+  remoteUrl(remote?: string): Promise<string>;
+  diff(options?: DiffOptions): Promise<string>;
   /** Disconnect the underlying MCP server subprocess. */
   close(): Promise<void>;
 }
 
 /**
- * Create the git sub-agent: a ReAct agent equipped with read-oriented git
- * tools — some hand-implemented, some delegated to the official Git MCP
- * server — and an empty system prompt (behaviour is driven entirely by the
- * task message the orchestrator sends). Construction is async because MCP
- * tools are loaded over the wire.
+ * Create the git sub-agent.
+ *
+ * The deterministic methods (`currentBranch`, `defaultBranch`, `remoteUrl`,
+ * `diff`) run the git CLI directly and cover the orchestrator's needs without a
+ * model or any subprocess. The ReAct layer behind `invoke` — a model equipped
+ * with read-oriented git tools, some delegated to the official Git MCP server —
+ * is built lazily on first `invoke`, so the common (direct-method) path spawns
+ * neither a model nor the MCP subprocess.
  */
 async function createGitSubAgent(options: GitSubAgentOptions = {}): Promise<GitSubAgent> {
-  const repository = options.git?.cwd ?? process.cwd();
-  const mcp = gitMcp({ repository }, MCP_ALLOWED_TOOLS);
+  // Lazily-initialized ReAct agent + its MCP client; created on first `invoke`.
+  let client: MultiServerMCPClient | null = null;
+  let agentPromise: Promise<ReturnType<typeof createAgent>> | null = null;
 
-  const client = new MultiServerMCPClient({
-    mcpServers: {
-      [mcp.name]: {
-        transport: "stdio",
-        command: mcp.command,
-        args: mcp.args,
-        env: mcp.env,
-      },
-    },
-  });
+  const ensureAgent = (): Promise<ReturnType<typeof createAgent>> => {
+    if (!agentPromise) {
+      agentPromise = (async () => {
+        const repository = options.git?.cwd ?? process.cwd();
+        const mcp = gitMcp({ repository }, MCP_ALLOWED_TOOLS);
 
-  const mcpTools = scopeTools(
-    (await client.getTools()) as StructuredToolInterface[],
-    mcp.allowedTools,
-  );
-  const tools = [...createGitTools(options.git), ...mcpTools];
+        client = new MultiServerMCPClient({
+          mcpServers: {
+            [mcp.name]: {
+              transport: "stdio",
+              command: mcp.command,
+              args: mcp.args,
+              env: mcp.env,
+            },
+          },
+        });
 
-  const model = options.model ?? resolveModelOrDefault(undefined, DEFAULT_MODEL);
+        const mcpTools = scopeTools(
+          (await client.getTools()) as StructuredToolInterface[],
+          mcp.allowedTools,
+        );
+        const tools = [...createGitTools(options.git), ...mcpTools];
+        const model = options.model ?? resolveModelOrDefault(undefined, DEFAULT_MODEL);
 
-  const agent = createAgent({
-    model,
-    tools,
-    // The plan mandates an empty system prompt for this sub-agent.
-    systemPrompt: systemPrompt || undefined,
-  });
+        return createAgent({
+          model,
+          tools,
+          // The plan mandates an empty system prompt for this sub-agent.
+          systemPrompt: systemPrompt || undefined,
+        });
+      })();
+    }
+    return agentPromise;
+  };
 
   return {
-    invoke: (input, config) => agent.invoke(input, config),
+    invoke: async (input, config) => (await ensureAgent()).invoke(input, config),
+    currentBranch: () => currentBranch(options.git),
+    defaultBranch: () => defaultBranch(options.git),
+    remoteUrl: (remote) => remoteUrl(remote, options.git),
+    diff: (diffOptions) => diff(diffOptions, options.git),
     async close() {
-      await client.close();
+      // Only the lazily-created ReAct layer holds a subprocess to tear down.
+      if (client) await client.close();
     },
   };
 }

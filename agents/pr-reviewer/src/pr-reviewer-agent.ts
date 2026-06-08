@@ -1,6 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import type { BaseMessage } from "@langchain/core/messages";
 import type { RunnableConfig } from "@langchain/core/runnables";
 import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
 import type { ProviderConfig } from "@andrew-codes/better-agents-pkg-types-git-provider";
@@ -40,17 +39,6 @@ interface ReviewResult {
   approved: boolean;
   /** The publisher's confirmation, or "" when nothing was published. */
   published: string;
-}
-
-/** Pull the exact output of a named tool call out of a ReAct agent result. */
-function toolOutput(result: { messages: BaseMessage[] }, toolName: string): string | null {
-  for (let i = result.messages.length - 1; i >= 0; i--) {
-    const m = result.messages[i];
-    if (m.getType() === "tool" && (m as { name?: string }).name === toolName) {
-      return typeof m.content === "string" ? m.content : JSON.stringify(m.content);
-    }
-  }
-  return null;
 }
 
 /** Resolve a provider configuration from a credentials block + env fallbacks. */
@@ -179,19 +167,9 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
   // PR up in, so the pr-identification sub-agent never has to search.
   const detectBranch = async () => {
     await emit({ type: "step", step: "detectBranch", label: "Detecting current branch" });
-    const res = await gitSubAgent.invoke(
-      {
-        messages: [
-          {
-            role: "user",
-            content: "Report the current git branch and the 'origin' remote URL using your tools.",
-          },
-        ],
-      },
-      reactConfig,
-    );
-    const branch = (toolOutput(res, "git_current_branch") ?? "").trim();
-    const remote = (toolOutput(res, "git_remote_url") ?? "").trim();
+    // Deterministic git lookups: run the CLI directly, with no model round-trip.
+    const branch = (await gitSubAgent.currentBranch()).trim();
+    const remote = (await gitSubAgent.remoteUrl().catch(() => "")).trim();
     const repo = remote ? parseRepoSlug(remote) : null;
     return { branch, repo };
   };
@@ -210,35 +188,17 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
   const computeDiff = async (state: typeof ReviewState.State) => {
     await emit({ type: "step", step: "computeDiff", label: "Computing diff" });
     // Prefer the PR's target branch; otherwise detect the repo's default branch.
+    // Deterministic git operations run the CLI directly — the (potentially huge)
+    // diff must never be fed back through a model just to be read, which would
+    // overflow the context window. Generated lockfiles and Yarn PnP artifacts
+    // are excluded by `diff` itself.
     let base = state.pr?.targetBranch;
     if (!base) {
-      const detect = await gitSubAgent.invoke(
-        {
-          messages: [
-            {
-              role: "user",
-              content:
-                "Determine the repository's default branch using your tools and report only its name.",
-            },
-          ],
-        },
-        reactConfig,
-      );
-      base = (toolOutput(detect, "git_default_branch") ?? "").trim() || "main";
+      base = (await gitSubAgent.defaultBranch()).trim() || "main";
     }
     const head = state.pr?.sourceBranch ?? state.branch;
-    const res = await gitSubAgent.invoke(
-      {
-        messages: [
-          {
-            role: "user",
-            content: `Produce the unified diff for the range ${base}...${head} using your tools.`,
-          },
-        ],
-      },
-      reactConfig,
-    );
-    return { diff: toolOutput(res, "git_diff") ?? "", baseRef: base };
+    const diff = await gitSubAgent.diff({ base, head });
+    return { diff, baseRef: base };
   };
 
   const reviewCode = async (state: typeof ReviewState.State) => {

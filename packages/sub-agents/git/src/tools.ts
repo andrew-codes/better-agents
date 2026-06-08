@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   currentBranch,
   defaultBranch,
+  diff,
   mergeBase,
   remoteUrl,
   runGit,
@@ -38,26 +39,21 @@ function createGitTools(ctx: GitContext = {}) {
   });
 
   const gitDiff = tool(
-    async ({ base, head, paths }) => {
-      const args = ["diff"];
-      if (base && head) {
-        args.push(`${base}...${head}`);
-      } else if (base) {
-        args.push(base);
-      }
-      if (paths?.length) {
-        args.push("--", ...paths);
-      }
-      return runGit(args, ctx);
-    },
+    async ({ base, head, paths, includeGenerated }) => diff({ base, head, paths, includeGenerated }, ctx),
     {
       name: "git_diff",
       description:
-        "Return a unified diff. With `base` and `head`, diffs the symmetric range base...head (changes on head since it diverged from base). With only `base`, diffs the working tree against base. Optionally restrict to `paths`.",
+        "Return a unified diff. With `base` and `head`, diffs the symmetric range base...head (changes on head since it diverged from base). With only `base`, diffs the working tree against base. Optionally restrict to `paths`. By default, machine-generated dependency lockfiles and Yarn PnP/zero-install artifacts are excluded; set `includeGenerated` to true to include them.",
       schema: z.object({
         base: z.string().optional().describe("Base ref, e.g. 'origin/main'."),
         head: z.string().optional().describe("Head ref, e.g. the PR branch or 'HEAD'."),
         paths: z.array(z.string()).optional().describe("Restrict the diff to these paths."),
+        includeGenerated: z
+          .boolean()
+          .optional()
+          .describe(
+            "Include machine-generated lockfiles and Yarn PnP/zero-install artifacts that are excluded by default.",
+          ),
       }),
     },
   );
