@@ -1,14 +1,24 @@
 # sub-agent: pr-review-feedback-publisher
 
-Reusable LangGraph ReAct sub-agent that **publishes an approved code review to its pull request** as feedback from the user. Bundled into top-level agents that depend on it (no standalone build).
+**Publishes an approved code review to its pull request** as feedback from the user. Bundled into top-level agents that depend on it (no standalone build).
 
 - **Package**: `@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher` (private)
-- **Default model**: Anthropic Haiku 4.5 (`claude-haiku-4-5-20251001`). Overridable by passing a `model` resolved from the central `config.yml`.
-- **System prompt**: `src/prompt.md` — instructs the agent to read the review file, extract the relevant feedback, and post it to the PR.
+- **No model**: despite the "sub-agent" name, publishing is **deterministic** — there is no LLM in the posting path. The approved review Markdown is parsed in code (`src/parse.ts`) and the provider's PR-review API is called directly with a constructed payload (`src/post.ts`). This makes inline-comment placement and the request-changes verdict reliable regardless of any model used elsewhere in the pipeline; an earlier model-driven version repeatedly failed to build the inline `comments[]` array and to recover from GitHub's self-review rejection.
+
+## How posting works
+
+1. `src/review-file.ts` reads the approved review (confined to `repoRoot`).
+2. `src/parse.ts` parses it into a **summary**, **findings** (each anchored to a `` `path:line` `` citation — the end line of a range), the **blocking** flag per finding (from a `###` "Blocking" subheading or a blocking label), and any **Questions**.
+3. `src/post.ts` posts one review: summary as the body, each located finding as an inline comment, verdict = `REQUEST_CHANGES` when any finding is blocking (else `COMMENT`). Broad findings with no line citation go into the body.
+
+### Recovery
+
+- **Self-review** (the reviewing token owns the PR): GitHub forbids `APPROVE`/`REQUEST_CHANGES` on your own PR, so the post degrades the event to `COMMENT`, **keeps the inline comments**, and records the intended verdict at the top of the body. You will never see a formal "changes requested" on a self-authored PR — test that path with a token belonging to a different account.
+- **Un-anchorable line** (a cited line not in the server's diff): the offending finding is folded into the body and the review is retried, so feedback is never lost.
 
 ## Providers
 
-Configured via `gitProvider` (`github` | `bitbucket`), exactly like the pr-identification sub-agent. The `GitProvider` / `ProviderConfig` union types come from [`@andrew-codes/better-agents-pkg-types-git-provider`](../../lib/types-git-provider); general MCP types (`McpServerSpec`, `scopeTools`) come from [`@andrew-codes/better-agents-pkg-mcp-utils`](../../lib/mcp-utils). Each provider's config type and MCP server-spec builder live together in their own dedicated lib — [`@andrew-codes/better-agents-pkg-mcp-github`](../../lib/mcp-github) and [`@andrew-codes/better-agents-pkg-mcp-bitbucket`](../../lib/mcp-bitbucket). This sub-agent supplies only the **allowlist**, scoped to the provider's **write** tools so the agent can post to the PR. Only PR comment / review tools are exposed — nothing that edits code or merges the PR.
+Configured via `gitProvider` (`github` | `bitbucket`), exactly like the pr-identification sub-agent. The `GitProvider` / `ProviderConfig` union types come from [`@andrew-codes/better-agents-pkg-types-git-provider`](../../lib/types-git-provider); general MCP types (`McpServerSpec`, `scopeTools`) come from [`@andrew-codes/better-agents-pkg-mcp-utils`](../../lib/mcp-utils). Each provider's config type and MCP server-spec builder live together in their own dedicated lib — [`@andrew-codes/better-agents-pkg-mcp-github`](../../lib/mcp-github) and [`@andrew-codes/better-agents-pkg-mcp-bitbucket`](../../lib/mcp-bitbucket). This sub-agent supplies only the **allowlist**, scoped to the provider's **write** tools. The MCP client is used purely for authenticated access to those tools, which `post.ts` invokes directly — only PR comment / review tools are exposed, nothing that edits code or merges the PR.
 
 ### GitHub
 
@@ -24,7 +34,7 @@ Configured via `gitProvider` (`github` | `bitbucket`), exactly like the pr-ident
 
 ## Local file access
 
-The agent also gets a repo-confined `read_review_file` tool so it can read the approved review Markdown directly. Reads are restricted to the repository root (`repoRoot`, default `process.cwd()`).
+The review Markdown is read via `src/review-file.ts`, confined to the repository root (`repoRoot`, default `process.cwd()`) so a caller-supplied path cannot escape the repo.
 
 ## Usage
 

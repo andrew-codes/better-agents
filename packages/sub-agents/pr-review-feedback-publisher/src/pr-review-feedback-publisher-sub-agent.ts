@@ -1,28 +1,25 @@
-import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import type { RunnableConfig } from "@langchain/core/runnables";
 import type { StructuredToolInterface } from "@langchain/core/tools";
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
-import { createAgent } from "langchain";
 import { bitbucketMcp } from "@andrew-codes/better-agents-pkg-mcp-bitbucket";
 import { githubMcp } from "@andrew-codes/better-agents-pkg-mcp-github";
 import { scopeTools, type McpServerSpec } from "@andrew-codes/better-agents-pkg-mcp-utils";
-import { resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
 import type { ProviderConfig } from "@andrew-codes/better-agents-pkg-types-git-provider";
-import systemPrompt from "./prompt.md";
-import { createFileTools } from "./tools.js";
-
-/** Default model name for the feedback-publisher sub-agent. Overridable via config. */
-const DEFAULT_MODEL = "haiku-4.5";
+import { parseReview } from "./parse.js";
+import { publishToBitbucket, publishToGitHub } from "./post.js";
+import { readReviewFile } from "./review-file.js";
 
 /**
  * Write-capable PR comment / review tools to expose — enough to post feedback,
  * nothing that edits code, pushes commits, or merges the PR.
+ *
+ * Posting is deterministic (see `post.ts`): GitHub uses one
+ * `create_pull_request_review` carrying the summary, the verdict and every
+ * inline comment; Bitbucket uses `addPullRequestComment` per finding.
  */
 const ALLOWED_TOOLS: Record<ProviderConfig["type"], string[]> = {
   github: [
     "get_pull_request",
-    // create_pull_request_review carries the summary (body), the verdict
-    // (event) and every inline finding (comments[]) in one call.
     "create_pull_request_review",
     // Fallback only, for feedback with no file/line to anchor to.
     "add_issue_comment",
@@ -43,18 +40,13 @@ interface PublishTarget {
   number: number;
   /** PR web URL — the publisher derives owner/repo (or workspace/repo) from it. */
   url: string;
-  /** PR title, for the agent's context. */
+  /** PR title, for logging context. */
   title?: string;
 }
 
 interface FeedbackPublisherOptions {
   /** Resolved provider configuration (github or bitbucket). */
   provider: ProviderConfig;
-  /**
-   * Chat model to drive the sub-agent. Defaults to Anthropic Haiku 4.5; the
-   * top-level agent passes an override resolved from the central config.yml.
-   */
-  model?: BaseChatModel;
   /**
    * Repository root the review file lives under. Reads are confined to it.
    * Defaults to `process.cwd()`.
@@ -64,12 +56,12 @@ interface FeedbackPublisherOptions {
 
 interface FeedbackPublisherSubAgent {
   /**
-   * Read the approved review at `reviewFilePath` and post it to `target` as a
-   * pull-request review: the summary as the review body, each located finding as
-   * an inline comment on its cited file/line, and a request-changes verdict when
-   * the review contains blocking findings. Returns the agent's final message.
-   * `config` is forwarded to the underlying ReAct agent (e.g. to attach
-   * callbacks for progress reporting).
+   * Read the approved review at `reviewFilePath`, parse it deterministically,
+   * and post it to `target` as a pull-request review: the summary as the review
+   * body, each located finding as an inline comment on its cited file/line, and
+   * a request-changes verdict when the review contains blocking findings.
+   * Returns a short human-readable summary of what was posted. `config` is
+   * accepted for API compatibility but no longer drives a model.
    */
   publish(
     input: { reviewFilePath: string; target: PublishTarget },
@@ -79,30 +71,14 @@ interface FeedbackPublisherSubAgent {
   close(): Promise<void>;
 }
 
-/** Coerce the agent's final message content into a plain string. */
-function finalText(result: { messages: Array<{ content: unknown }> }): string {
-  const last = result.messages[result.messages.length - 1];
-  const content = last?.content;
-  if (typeof content === "string") return content;
-  if (Array.isArray(content)) {
-    return content
-      .map((part) =>
-        typeof part === "string"
-          ? part
-          : part && typeof part === "object" && "text" in part
-            ? String((part as { text: unknown }).text)
-            : "",
-      )
-      .join("");
-  }
-  return "";
-}
-
 /**
- * Create the pr-review-feedback-publisher sub-agent: a ReAct agent wired to the
- * provider's write-capable MCP server (scoped to PR comment/review tools) plus a
- * repo-confined file-read tool. Construction is async because MCP tools are
- * loaded over the wire.
+ * Create the pr-review-feedback-publisher sub-agent. Despite the name, posting
+ * is **deterministic**: the approved review Markdown is parsed in code and the
+ * provider's PR-review API is called directly with a constructed payload. This
+ * removes the model from the mechanical posting step, so inline-comment
+ * placement and the request-changes verdict are reliable regardless of any
+ * model used elsewhere in the pipeline. Construction is async because the
+ * provider's MCP tools are loaded over the wire.
  */
 async function createFeedbackPublisherSubAgent(
   options: FeedbackPublisherOptions,
@@ -120,40 +96,26 @@ async function createFeedbackPublisherSubAgent(
     },
   });
 
-  const mcpTools = scopeTools(
+  const tools = scopeTools(
     (await client.getTools()) as StructuredToolInterface[],
     mcp.allowedTools,
   );
-  const tools = [...createFileTools(options.repoRoot), ...mcpTools];
-
-  const model = options.model ?? resolveModelOrDefault(undefined, DEFAULT_MODEL);
-
-  const agent = createAgent({
-    model,
-    tools,
-    systemPrompt: systemPrompt || undefined,
-  });
 
   return {
-    async publish({ reviewFilePath, target }, config?: RunnableConfig) {
-      const task =
-        `Publish the approved code review to the ${options.provider.type} pull ` +
-        `request #${target.number} (${target.url}).\n` +
-        (target.title ? `PR title: ${target.title}\n` : "") +
-        `The approved review file is at "${reviewFilePath}". Read it with ` +
-        `read_review_file, then post it as one pull-request review: the summary ` +
-        `as the review body, each located finding as an inline comment anchored ` +
-        `to its cited file and line, and the verdict set to request-changes when ` +
-        `there is any blocking finding. Derive the repository owner/name (or ` +
-        `workspace/repo) from the PR URL.`;
+    async publish({ reviewFilePath, target }) {
+      const markdown = await readReviewFile(reviewFilePath, options.repoRoot);
+      const parsed = parseReview(markdown);
 
-      const result = await agent.invoke(
-        {
-          messages: [{ role: "user", content: task }],
-        },
-        config,
-      );
-      return finalText(result as { messages: Array<{ content: unknown }> });
+      if (!parsed.summary && parsed.findings.length === 0 && parsed.unlocated.length === 0) {
+        throw new Error(`Review file "${reviewFilePath}" has no summary or findings to publish.`);
+      }
+
+      const result =
+        options.provider.type === "github"
+          ? await publishToGitHub(tools, target, parsed)
+          : await publishToBitbucket(tools, target, parsed, options.provider.workspace);
+
+      return result.message;
     },
     async close() {
       await client.close();
@@ -162,4 +124,4 @@ async function createFeedbackPublisherSubAgent(
 }
 
 export type { FeedbackPublisherOptions, FeedbackPublisherSubAgent, PublishTarget };
-export { DEFAULT_MODEL, createFeedbackPublisherSubAgent };
+export { ALLOWED_TOOLS, createFeedbackPublisherSubAgent };

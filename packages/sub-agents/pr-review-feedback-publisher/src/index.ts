@@ -1,6 +1,6 @@
 export {
+  ALLOWED_TOOLS,
   createFeedbackPublisherSubAgent,
-  DEFAULT_MODEL,
 } from "./pr-review-feedback-publisher-sub-agent.js";
 export type {
   FeedbackPublisherOptions,
