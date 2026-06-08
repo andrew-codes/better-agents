@@ -11,7 +11,7 @@ Review the diff according to the following guidelines:
 
 Produce the review as well-structured Markdown suitable for a human to read, annotate, and ultimately post to the pull request. Use this shape:
 
-- A short **Summary** of your overall assessment.
+- A short **Summary** of your overall assessment of the PR (e.g. whether it is ready to merge, your level of confidence, and the general quality of the changes). Do **NOT** restate or describe what the PR changes — the reader already has the diff. The summary is your judgement, not a changelog.
 - A **Findings** section: one bullet per issue. Each finding **MUST** cite the **file** AND **line number** (taken from the diff's line-number gutter), state the concern, and explain why it matters. Group or label by severity (e.g. blocking, suggestion, nit) so a reader can triage quickly.
   - The file and line number are used to anchor the finding to the exact code when posting it to the pull request, so they must be present and accurate.
   - The only finding that may omit a line number is one too broad to attach to any single line (e.g. an observation spanning a whole file or the PR as a whole). Such a finding must still name the file(s) it concerns.
