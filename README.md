@@ -2,6 +2,13 @@
 
 A collection of AI agents that plug into your editor (e.g. [Zed](https://zed.dev)) over the Agent Communication Protocol (ACP) to help with everyday development tasks like reviewing code.
 
+<a href="https://www.loom.com/share/e580d731178c44229008e4f5be02d01d">
+  <p>Efficient PR Code Reviews with AI Assist - Watch Video</p>
+</a>
+<a href="https://www.loom.com/share/e580d731178c44229008e4f5be02d01d">
+  <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/e580d731178c44229008e4f5be02d01d-67a296cb6caa143e-full-play.gif#t=0.1">
+</a>
+
 ## Available agents
 
 | Agent | What it does |
