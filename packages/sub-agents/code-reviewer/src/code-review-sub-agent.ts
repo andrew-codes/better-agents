@@ -3,6 +3,7 @@ import type { MessageContent } from "@langchain/core/messages";
 import { resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
 import {
   CHARS_PER_TOKEN_ESTIMATE,
+  annotateDiffWithLineNumbers,
   chunkDiffFiles,
   estimateTokens,
   partitionExcluded,
@@ -298,7 +299,7 @@ function createCodeReviewSubAgent(options: CodeReviewSubAgentOptions = {}): Code
   return {
     async review(input: CodeReviewInput) {
       const { kept, excludedPaths } = partitionExcluded(splitDiffByFile(input.diff));
-      const filteredDiff = kept.map((file) => file.text).join("\n");
+      const filteredDiff = annotateDiffWithLineNumbers(kept.map((file) => file.text).join("\n"));
 
       if (estimateTokens(filteredDiff) <= MAX_DIFF_TOKENS) {
         const scopedInput = { ...input, diff: filteredDiff };
@@ -320,7 +321,10 @@ function createCodeReviewSubAgent(options: CodeReviewSubAgentOptions = {}): Code
             `\n↪ Reviewing part ${scope.index}/${scope.total}: ${files.join(", ")}\n`,
           );
         }
-        const chunkInput = { ...input, diff: chunk.map((file) => file.text).join("\n") };
+        const chunkInput = {
+          ...input,
+          diff: annotateDiffWithLineNumbers(chunk.map((file) => file.text).join("\n")),
+        };
         const task = input.revision
           ? revisionTask(chunkInput, { excludedPaths, scope })
           : reviewTask(chunkInput, { excludedPaths, scope });

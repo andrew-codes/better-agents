@@ -6,6 +6,8 @@ interface DiffFile {
 
 const FILE_HEADER = /^diff --git a\/(.*) b\/(.*)$/;
 const HUNK_HEADER = /^@@ .* @@/;
+/** Hunk header range, capturing the new-file start line and (optional) count. */
+const HUNK_RANGE = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/;
 
 /**
  * Split a `git diff` unified-diff string into one entry per changed file,
@@ -168,10 +170,72 @@ function chunkDiffFiles(files: readonly DiffFile[], maxChars: number): DiffFile[
   return chunks;
 }
 
+/**
+ * Prefix every line of a unified diff with its line number in the new file,
+ * so the reviewer can cite accurate `file:line` coordinates (and the publisher
+ * can anchor inline comments) by reading the gutter directly instead of
+ * counting lines from each hunk header — counting it almost always gets wrong.
+ *
+ * Hunk headers (`@@ -a +b @@`) seed the new-file counter; added (`+`) and
+ * context (` `) lines carry and advance it. Removed (`-`) lines have no
+ * new-file line, file headers (`diff --git`, `index`, `---`, `+++`), and the
+ * `\ No newline` marker get a blank gutter. The gutter is right-aligned to the
+ * widest line number in the diff so the columns line up.
+ */
+function annotateDiffWithLineNumbers(diff: string): string {
+  const lines = diff.split("\n");
+
+  // First pass: size the gutter to the largest new-file line number present.
+  let maxLine = 0;
+  for (const line of lines) {
+    const range = HUNK_RANGE.exec(line);
+    if (range) {
+      const start = Number(range[1]);
+      const count = range[2] === undefined ? 1 : Number(range[2]);
+      maxLine = Math.max(maxLine, start + count);
+    }
+  }
+  const width = Math.max(String(maxLine).length, 3);
+  const blank = " ".repeat(width);
+
+  let newLine = 0;
+  let inHunk = false;
+  const out: string[] = [];
+  for (const line of lines) {
+    if (line.startsWith("diff --git")) {
+      inHunk = false;
+      out.push(`${blank}  ${line}`);
+      continue;
+    }
+    const range = HUNK_RANGE.exec(line);
+    if (range) {
+      inHunk = true;
+      newLine = Number(range[1]);
+      out.push(`${blank}  ${line}`);
+      continue;
+    }
+    // Outside a hunk body (file headers, `index`, `---`/`+++`): no line number.
+    if (!inHunk) {
+      out.push(`${blank}  ${line}`);
+      continue;
+    }
+    const marker = line[0];
+    if (marker === "+" || marker === " ") {
+      out.push(`${String(newLine).padStart(width)}  ${line}`);
+      newLine++;
+    } else {
+      // Removed (`-`) lines and the `\ No newline at end of file` marker.
+      out.push(`${blank}  ${line}`);
+    }
+  }
+  return out.join("\n");
+}
+
 export type { DiffFile };
 export {
   CHARS_PER_TOKEN_ESTIMATE,
   EXCLUDED_PATH_PATTERNS,
+  annotateDiffWithLineNumbers,
   chunkDiffFiles,
   estimateTokens,
   partitionExcluded,
