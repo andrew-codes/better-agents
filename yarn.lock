@@ -75,6 +75,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@andrew-codes/better-agents-pkg-pr-review-feedback-publisher@workspace:*, @andrew-codes/better-agents-pkg-pr-review-feedback-publisher@workspace:packages/lib/pr-review-feedback-publisher":
+  version: 0.0.0-use.local
+  resolution: "@andrew-codes/better-agents-pkg-pr-review-feedback-publisher@workspace:packages/lib/pr-review-feedback-publisher"
+  dependencies:
+    "@andrew-codes/better-agents-pkg-mcp-bitbucket": "workspace:*"
+    "@andrew-codes/better-agents-pkg-mcp-github": "workspace:*"
+    "@andrew-codes/better-agents-pkg-mcp-utils": "workspace:*"
+    "@andrew-codes/better-agents-pkg-types-git-provider": "workspace:*"
+    "@langchain/core": "npm:^1.0.0"
+    "@langchain/langgraph": "npm:^1.2.0"
+    "@langchain/mcp-adapters": "npm:^1.0.0"
+    "@types/node": "npm:^22.0.0"
+    typescript: "npm:latest"
+    zod: "npm:^4.0.0"
+  languageName: unknown
+  linkType: soft
+
 "@andrew-codes/better-agents-pkg-sub-agent-code-reviewer@workspace:*, @andrew-codes/better-agents-pkg-sub-agent-code-reviewer@workspace:packages/sub-agents/code-reviewer":
   version: 0.0.0-use.local
   resolution: "@andrew-codes/better-agents-pkg-sub-agent-code-reviewer@workspace:packages/sub-agents/code-reviewer"
@@ -123,21 +140,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher@workspace:*, @andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher@workspace:packages/sub-agents/pr-review-feedback-publisher":
-  version: 0.0.0-use.local
-  resolution: "@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher@workspace:packages/sub-agents/pr-review-feedback-publisher"
-  dependencies:
-    "@andrew-codes/better-agents-pkg-mcp-bitbucket": "workspace:*"
-    "@andrew-codes/better-agents-pkg-mcp-github": "workspace:*"
-    "@andrew-codes/better-agents-pkg-mcp-utils": "workspace:*"
-    "@andrew-codes/better-agents-pkg-types-git-provider": "workspace:*"
-    "@langchain/core": "npm:^1.0.0"
-    "@langchain/mcp-adapters": "npm:^1.0.0"
-    "@types/node": "npm:^22.0.0"
-    typescript: "npm:latest"
-  languageName: unknown
-  linkType: soft
-
 "@andrew-codes/better-agents-pkg-types-git-provider@workspace:*, @andrew-codes/better-agents-pkg-types-git-provider@workspace:packages/lib/types-git-provider":
   version: 0.0.0-use.local
   resolution: "@andrew-codes/better-agents-pkg-types-git-provider@workspace:packages/lib/types-git-provider"
@@ -156,10 +158,10 @@ __metadata:
     "@andrew-codes/better-agents-pkg-config": "workspace:*"
     "@andrew-codes/better-agents-pkg-model": "workspace:*"
     "@andrew-codes/better-agents-pkg-plannotator": "workspace:*"
+    "@andrew-codes/better-agents-pkg-pr-review-feedback-publisher": "workspace:*"
     "@andrew-codes/better-agents-pkg-sub-agent-code-reviewer": "workspace:*"
     "@andrew-codes/better-agents-pkg-sub-agent-git": "workspace:*"
     "@andrew-codes/better-agents-pkg-sub-agent-pr-identification": "workspace:*"
-    "@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher": "workspace:*"
     "@andrew-codes/better-agents-pkg-types-git-provider": "workspace:*"
     "@langchain/core": "npm:^1.0.0"
     "@langchain/langgraph": "npm:^1.2.0"

@@ -1,5 +1,5 @@
 {
-  "name": "@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher",
+  "name": "@andrew-codes/better-agents-pkg-pr-review-feedback-publisher",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,9 @@
     "@andrew-codes/better-agents-pkg-mcp-utils": "workspace:*",
     "@andrew-codes/better-agents-pkg-types-git-provider": "workspace:*",
     "@langchain/core": "^1.0.0",
-    "@langchain/mcp-adapters": "^1.0.0"
+    "@langchain/langgraph": "^1.2.0",
+    "@langchain/mcp-adapters": "^1.0.0",
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

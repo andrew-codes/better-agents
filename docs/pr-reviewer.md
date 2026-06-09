@@ -28,7 +28,7 @@ Add a `pr-reviewer` entry to `~/.config/better-agents/config.yml`. Every key is 
 agents:
   - pr-reviewer:
       model:
-        name: sonnet-4.6
+        name: sonnet-4.6 # Overrides the default model; available for all agents/sub-agents.
       env:
         GITHUB_TOKEN: ${GITHUB_TOKEN}
       config:
@@ -38,9 +38,9 @@ agents:
             github:
               token: ${GITHUB_TOKEN} # falls back to env GITHUB_TOKEN
             bitbucket:
-              username: ${BITBUCKET_USERNAME}
               workspace: ${BITBUCKET_WORKSPACE}
-              token: ${BITBUCKET_TOKEN}
+              email: ${BITBUCKET_EMAIL}
+              apiToken: ${BITBUCKET_API_TOKEN}
           codeReviewer:
             # Principles the reviewer follows — a string or a list of strings,
             # combined with its built-in review guidelines.
@@ -55,13 +55,13 @@ agents:
             github:
               token: ${GITHUB_TOKEN}
             bitbucket:
-              username: ${BITBUCKET_USERNAME}
               workspace: ${BITBUCKET_WORKSPACE}
-              token: ${BITBUCKET_TOKEN}
+              email: ${BITBUCKET_EMAIL}
+              apiToken: ${BITBUCKET_API_TOKEN}
 ```
 
 A few things worth knowing:
 
-- **Provider credentials** can be set either directly in `config.yml` or via the corresponding environment variables (`GITHUB_TOKEN`, `BITBUCKET_USERNAME`, `BITBUCKET_WORKSPACE`, `BITBUCKET_TOKEN`). `gitProvider` controls which one the agent uses to look up the PR and to publish feedback — set it independently for lookup (`prIdentification`) and publishing (`feedbackPublisher`) if you ever need them to differ.
+- **Provider credentials** can be set either directly in `config.yml` or via the corresponding environment variables (`GITHUB_TOKEN`, `BITBUCKET_WORKSPACE`, `BITBUCKET_EMAIL`, `BITBUCKET_API_TOKEN`). `gitProvider` controls which one the agent uses to look up the PR and to publish feedback — set it independently for lookup (`prIdentification`) and publishing (`feedbackPublisher`) if you ever need them to differ. Bitbucket auth uses an Atlassian account email + API token (Basic auth), used both for Atlassian's official Rovo MCP server (PR lookup) and the Bitbucket REST API (publishing inline comments).
 - **`principles` and `tone`** are the main levers for shaping review quality — use them to match your team's standards and communication style.
 - **`model.name`** picks the model that powers the agent overall; nothing else needs to be configured to get started.

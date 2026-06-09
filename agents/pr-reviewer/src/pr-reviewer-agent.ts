@@ -16,9 +16,9 @@ import {
   type RepoCoordinates,
 } from "@andrew-codes/better-agents-pkg-sub-agent-pr-identification";
 import {
-  createFeedbackPublisherSubAgent,
-  type FeedbackPublisherSubAgent,
-} from "@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher";
+  createFeedbackPublisher,
+  type FeedbackPublisher,
+} from "@andrew-codes/better-agents-pkg-pr-review-feedback-publisher";
 import { annotate } from "@andrew-codes/better-agents-pkg-plannotator";
 import type { GitProviderCredentials, PrReviewerConfig } from "./config/schema.js";
 
@@ -54,9 +54,9 @@ function resolveProvider(creds: GitProviderCredentials | undefined): ProviderCon
   if (provider === "bitbucket") {
     return {
       type: "bitbucket",
-      username: creds?.bitbucket?.username ?? process.env.BITBUCKET_USERNAME ?? "",
       workspace: creds?.bitbucket?.workspace ?? process.env.BITBUCKET_WORKSPACE ?? "",
-      token: creds?.bitbucket?.token ?? process.env.BITBUCKET_TOKEN ?? "",
+      email: creds?.bitbucket?.email ?? process.env.BITBUCKET_EMAIL ?? "",
+      apiToken: creds?.bitbucket?.apiToken ?? process.env.BITBUCKET_API_TOKEN ?? "",
     };
   }
 
@@ -159,7 +159,7 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
     tone: subAgents?.codeReviewer?.tone,
   });
 
-  const publisherSubAgent: FeedbackPublisherSubAgent = await createFeedbackPublisherSubAgent({
+  const publisher: FeedbackPublisher = await createFeedbackPublisher({
     provider: resolveProvider(subAgents?.feedbackPublisher),
     repoRoot: process.cwd(),
   });
@@ -319,7 +319,7 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
   const publishFeedback = async (state: typeof ReviewState.State) => {
     await emit({ type: "step", step: "publishFeedback", label: "Publishing feedback" });
     const pr = state.pr as PrDetails;
-    const published = await publisherSubAgent.publish(
+    const published = await publisher.publish(
       {
         reviewFilePath: state.reviewPath,
         target: { number: pr.number, url: pr.url, title: pr.title },
@@ -411,7 +411,7 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
     async close() {
       await gitSubAgent.close();
       await prSubAgent.close();
-      await publisherSubAgent.close();
+      await publisher.close();
     },
   };
 }

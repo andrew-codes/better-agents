@@ -22,7 +22,7 @@ const DEFAULT_MODEL = "haiku-4.5";
  */
 const ALLOWED_TOOLS: Record<ProviderConfig["type"], string[]> = {
   github: ["list_pull_requests", "get_pull_request"],
-  bitbucket: ["getPullRequests", "getPullRequest"],
+  bitbucket: ["getPullRequests", "getPullRequestDetails"],
 };
 
 /** Build the MCP server spec for the configured provider, scoped to `ALLOWED_TOOLS`. */
