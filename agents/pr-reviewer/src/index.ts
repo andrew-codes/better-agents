@@ -26,7 +26,10 @@ function summarize(result: ReviewResult): string {
     return lines.join("\n");
   }
   // Past the stopReason check, identifyPr guarantees a PR was found.
-  const pr = result.pr as NonNullable<ReviewResult["pr"]>;
+  if (!result.pr) {
+    throw new Error("Invariant violation: pr is null after stopReason check");
+  }
+  const pr = result.pr;
   lines.push(
     `PR #${pr.number}: ${pr.title}`,
     `  ${pr.url}`,

@@ -161,7 +161,6 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
 
   const publisherSubAgent: FeedbackPublisherSubAgent = await createFeedbackPublisherSubAgent({
     provider: resolveProvider(subAgents?.feedbackPublisher),
-    model: resolveModel(subAgents?.feedbackPublisher?.model),
     repoRoot: process.cwd(),
   });
 
@@ -199,7 +198,10 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
     }
     const remoteDefault = (await gitSubAgent.defaultBranch()).trim() || "main";
     const refs = Array.from(new Set([state.branch, remoteDefault].filter(Boolean)));
-    await gitSubAgent.fetchRefs(refs);
+    // Use explicit refspecs so the remote-tracking refs (origin/<branch>) are
+    // always written, regardless of the repo's configured fetch refspec.
+    const refspecs = refs.map((r) => `${r}:refs/remotes/origin/${r}`);
+    await gitSubAgent.fetchRefs(refspecs);
     return {};
   };
 
@@ -251,7 +253,16 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
     const headName = state.pr?.sourceBranch || state.branch;
     const base = `origin/${baseName}`;
     const head = `origin/${headName}`;
-    const diff = await gitSubAgent.diff({ base, head });
+    let diff: string;
+    try {
+      diff = await gitSubAgent.diff({ base, head });
+    } catch {
+      return {
+        stopReason:
+          `Could not compute diff between "${base}" and "${head}". ` +
+          `Make sure the source branch has been pushed to the remote.`,
+      };
+    }
     return { diff, baseRef: base };
   };
 

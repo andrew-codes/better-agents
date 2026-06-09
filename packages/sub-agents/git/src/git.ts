@@ -136,7 +136,8 @@ async function fetchRefs(
 async function aheadCount(ref: string, base: string, ctx?: GitContext): Promise<number | null> {
   try {
     const out = await runGit(["rev-list", "--count", `${base}..${ref}`], ctx);
-    return parseInt(out, 10) || 0;
+    const n = parseInt(out, 10);
+    return isNaN(n) ? null : n;
   } catch {
     return null;
   }
