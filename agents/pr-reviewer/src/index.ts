@@ -21,16 +21,21 @@ import instructions from "./prompt.md";
 function summarize(result: ReviewResult): string {
   const lines: string[] = [];
   lines.push(`Branch: ${result.branch || "(unknown)"}`);
-  if (result.pr) {
-    lines.push(
-      `PR #${result.pr.number}: ${result.pr.title}`,
-      `  ${result.pr.url}`,
-      `  ${result.pr.author} — ${result.pr.sourceBranch} → ${result.pr.targetBranch}` +
-        ` (${result.pr.state}${result.pr.isDraft ? ", draft" : ""})`,
-    );
-  } else {
-    lines.push("No open pull request found for this branch.");
+  if (result.stopReason) {
+    lines.push("", result.stopReason);
+    return lines.join("\n");
   }
+  // Past the stopReason check, identifyPr guarantees a PR was found.
+  if (!result.pr) {
+    throw new Error("Invariant violation: pr is null after stopReason check");
+  }
+  const pr = result.pr;
+  lines.push(
+    `PR #${pr.number}: ${pr.title}`,
+    `  ${pr.url}`,
+    `  ${pr.author} — ${pr.sourceBranch} → ${pr.targetBranch}` +
+      ` (${pr.state}${pr.isDraft ? ", draft" : ""})`,
+  );
   lines.push("", `Diff (base ${result.baseRef}):`, result.diff || "(empty)");
   lines.push("");
   if (result.reviewPath) {
@@ -39,8 +44,6 @@ function summarize(result: ReviewResult): string {
   lines.push(`Approved: ${result.approved ? "yes" : "no"}`);
   if (result.published) {
     lines.push("", "Published feedback:", result.published);
-  } else if (result.approved) {
-    lines.push("Approved but nothing was published (no PR to post to).");
   } else {
     lines.push("Not published (review was not approved).");
   }

@@ -9,16 +9,25 @@ It reviews the pull request associated with the current git branch by coordinati
 
 ```
 detectBranch (git sub-agent)
-   → identifyPr (pr-identification sub-agent)        # PR metadata only, no diff
-   → computeDiff (git sub-agent)                     # local `git diff`
+   → fetchRemote (git sub-agent)                     # `git fetch origin <branch> <default branch>`
+   → checkLocalAhead (git sub-agent)                 # stop if local has commits not on origin/<branch>
+   → identifyPr (pr-identification sub-agent)        # PR metadata only, no diff; stop if none found
+   → computeDiff (git sub-agent)                     # local `git diff` against remote-tracking refs
    → reviewCode (code-reviewer sub-agent)            # comprehensive review of the diff
    → annotateReview (plannotator)                    # human review/revise/approve loop
-   → publishFeedback (pr-review-feedback-publisher)  # only when approved
+   → publishFeedback (pr-review-feedback-publisher)  # only when approved; deletes the review file after posting
 ```
 
 The PR's code diff is always produced locally via `git diff`; it is never fetched from the hosting provider.
 
-The repository is always the current working directory, and the diff base is the PR's target branch — or, when no PR is found, the repository's default branch (detected from `origin/HEAD`). Neither is configurable.
+The repository is always the current working directory. Before anything else runs, the workflow fetches `origin/<branch>` and `origin/<default branch>` so the rest of the steps compare against the remote's current state rather than potentially stale local refs. The diff base is the PR's target branch (or, if that's unset, the repository's default branch) — always read from the remote-tracking ref (`origin/<branch>`), never the local branch. Neither is configurable.
+
+### Stopping early
+
+The workflow stops — without computing a diff or running a review — and reports back to the user when:
+
+- **No open pull request is found** for the current branch (or the repo's remote can't be determined). Push a branch and open a PR, then try again.
+- **The local branch is ahead of `origin/<branch>`.** A review can only reflect what's actually in the pull request, which is whatever has been pushed; push your local commits first.
 
 ### Review, annotate, publish
 
@@ -28,7 +37,7 @@ The code review is written to `tmp/reviews/<PR-ID>-YYYY-MM-DD.md` (relative to t
 - **annotated** — the human's feedback is fed back to the code-reviewer sub-agent, which revises the review; the updated file is re-presented. This repeats (bounded) until approval or dismissal.
 - **dismissed** — the workflow stops; nothing is published.
 
-On approval, the approved review file is handed to the **pr-review-feedback-publisher** sub-agent, which reads it and posts the feedback to the PR using its configured provider. When there is no PR, nothing is published.
+On approval, the approved review file is handed to the **pr-review-feedback-publisher** sub-agent, which reads it and posts the feedback to the PR using its configured provider, after which the file is deleted from disk.
 
 ## Configuration
 

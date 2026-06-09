@@ -8,9 +8,11 @@ import { gitMcp } from "@andrew-codes/better-agents-pkg-mcp-git";
 import { scopeTools } from "@andrew-codes/better-agents-pkg-mcp-utils";
 import { resolveModelOrDefault } from "@andrew-codes/better-agents-pkg-model";
 import {
+  aheadCount,
   currentBranch,
   defaultBranch,
   diff,
+  fetchRefs,
   remoteUrl,
   type DiffOptions,
   type GitContext,
@@ -59,6 +61,14 @@ interface GitSubAgent {
   /** Fetch URL of a git remote (defaults to 'origin'). */
   remoteUrl(remote?: string): Promise<string>;
   diff(options?: DiffOptions): Promise<string>;
+  /** Fetch the given refs from a remote (defaults to 'origin') so remote-tracking refs are current. */
+  fetchRefs(refs: readonly string[], remote?: string): Promise<void>;
+  /**
+   * How many commits `ref` is ahead of `base` (e.g. a local branch ahead of its
+   * remote-tracking branch). `null` when the comparison can't be made — for
+   * instance `base` doesn't exist because the branch was never pushed.
+   */
+  aheadCount(ref: string, base: string): Promise<number | null>;
   /** Disconnect the underlying MCP server subprocess. */
   close(): Promise<void>;
 }
@@ -119,6 +129,8 @@ async function createGitSubAgent(options: GitSubAgentOptions = {}): Promise<GitS
     defaultBranch: () => defaultBranch(options.git),
     remoteUrl: (remote) => remoteUrl(remote, options.git),
     diff: (diffOptions) => diff(diffOptions, options.git),
+    fetchRefs: (refs, remote) => fetchRefs(refs, remote, options.git),
+    aheadCount: (ref, base) => aheadCount(ref, base, options.git),
     async close() {
       // Only the lazily-created ReAct layer holds a subprocess to tear down.
       if (client) await client.close();
