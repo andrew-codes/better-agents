@@ -205,7 +205,11 @@ async function postBitbucketComment(
 
 /** Best-effort extraction of the human (html) comment URL from a Bitbucket response. */
 function extractBitbucketHtmlUrl(result: string): string | undefined {
-  return /"html"\s*:\s*\{\s*"href"\s*:\s*"([^"]+)"/.exec(result)?.[1];
+  try {
+    return (JSON.parse(result) as { links?: { html?: { href?: string } } })?.links?.html?.href;
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -221,6 +225,9 @@ async function publishToBitbucket(
   target: { number: number; url: string },
   parsed: ParsedReview,
 ): Promise<PublishResult> {
+  if (!provider.email || !provider.apiToken) {
+    throw new Error("Missing Bitbucket credentials: both email and apiToken are required.");
+  }
   let workspace: string;
   let repo: string;
   try {

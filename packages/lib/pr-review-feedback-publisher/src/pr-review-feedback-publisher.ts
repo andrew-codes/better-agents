@@ -42,7 +42,7 @@ interface FeedbackPublisherOptions {
   provider: ProviderConfig;
   /**
    * Repository root the review file lives under. Reads are confined to it.
-   * Defaults to `process.cwd()`.
+   * The `process.cwd()` default is applied downstream in `readReviewFile`.
    */
   repoRoot?: string;
 }

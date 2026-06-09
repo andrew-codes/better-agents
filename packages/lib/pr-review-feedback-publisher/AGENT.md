@@ -3,7 +3,7 @@
 **Publishes an approved code review to its pull request** as feedback from the user. Bundled into top-level agents that depend on it (no standalone build).
 
 - **Package**: `@andrew-codes/better-agents-pkg-pr-review-feedback-publisher` (private)
-- **Not a sub-agent**: this is a plain library, not an agent. Publishing is **deterministic** — there is no LLM in the posting path. The approved review Markdown is parsed in code (`src/parse.ts`) and the PR is updated with a constructed payload (`src/post.ts`). This makes inline-comment placement and the request-changes verdict reliable regardless of any model used elsewhere in the pipeline; an earlier model-driven version repeatedly failed to build the inline comments array and to recover from GitHub's self-review rejection. (It previously lived under `packages/sub-agents/`; it was moved to `packages/lib/` because nothing about it is agentic.)
+- **Not a sub-agent**: this is a plain library, not an agent. Publishing is **deterministic** — there is no LLM in the posting path. The approved review Markdown is parsed in code (`src/parse.ts`) and the PR is updated with a constructed payload (`src/post.ts`). This makes inline-comment placement and the request-changes verdict reliable regardless of any model used elsewhere in the pipeline; an earlier model-driven version repeatedly failed to build the inline comments array and to recover from GitHub's self-review rejection.
 
 ## How posting works
 

@@ -27,8 +27,10 @@ function bitbucketMcp(config: BitbucketProviderConfig, allowedTools: string[]): 
   return {
     name: "bitbucket",
     command: "npx",
-    args: ["-y", "mcp-remote@latest", ROVO_MCP_URL, "--header", `Authorization: Basic ${basic}`],
-    env: {},
+    // mcp-remote substitutes ${ENV_VAR} in header values from the child process env,
+    // keeping the credential out of argv (visible in ps/logs).
+    args: ["-y", "mcp-remote@0.1.38", ROVO_MCP_URL, "--header", "Authorization: Basic ${BITBUCKET_BASIC_AUTH}"],
+    env: { BITBUCKET_BASIC_AUTH: basic },
     allowedTools,
   };
 }
