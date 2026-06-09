@@ -270,16 +270,12 @@ const RAW_RUNTIME_STATE =
           ["@andrew-codes/better-agents-pkg-mcp-bitbucket", "workspace:packages/lib/mcp-bitbucket"],\
           ["@andrew-codes/better-agents-pkg-mcp-github", "workspace:packages/lib/mcp-github"],\
           ["@andrew-codes/better-agents-pkg-mcp-utils", "workspace:packages/lib/mcp-utils"],\
-          ["@andrew-codes/better-agents-pkg-model", "workspace:packages/lib/model"],\
           ["@andrew-codes/better-agents-pkg-sub-agent-pr-review-feedback-publisher", "workspace:packages/sub-agents/pr-review-feedback-publisher"],\
           ["@andrew-codes/better-agents-pkg-types-git-provider", "workspace:packages/lib/types-git-provider"],\
           ["@langchain/core", "npm:1.1.48"],\
-          ["@langchain/langgraph", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5"],\
-          ["@langchain/mcp-adapters", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.1.3"],\
+          ["@langchain/mcp-adapters", "virtual:7f52074393eb362041f81494a585f80db87066308c18ade29c0af35a5cc29201b668578943377fb7a9c3ef0f455f6eaac18b06974c0e2b0e18281d51920c12ef#npm:1.1.3"],\
           ["@types/node", "npm:22.19.19"],\
-          ["langchain", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.4.4"],\
-          ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"],\
-          ["zod", "npm:4.4.3"]\
+          ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"]\
         ],\
         "linkType": "SOFT"\
       }]\
@@ -1568,6 +1564,27 @@ const RAW_RUNTIME_STATE =
           ["@langchain/core", "npm:1.1.48"],\
           ["@langchain/langgraph", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.3.5"],\
           ["@langchain/mcp-adapters", "virtual:67c0289d74f4e124a82f31ef7ab84f69c5ac16be0d101bd84f22eaed5bd335d6307487fdf798e7fa18ce4e9775830dcdd315cf2579ed03cfb7d712c220cf9b99#npm:1.1.3"],\
+          ["@modelcontextprotocol/sdk", "virtual:2352920f688ebe378ddd7045c05b0a873745a2fc2d31b37fc537444b089266ea792b9fa3d435533ff027a40feafce1bfe777fb2bc396b168ea4319febf241f2e#npm:1.29.0"],\
+          ["@types/langchain__core", null],\
+          ["@types/langchain__langgraph", null],\
+          ["debug", "virtual:a9befa25e313e095e04a92d21e412bbc4cefabe625656c830f17ea194970509d9899df6dc6fba9e7ee796ee7a2b2f3d6abf75ecf43a9fea4755de2fe40280997#npm:4.4.3"],\
+          ["extended-eventsource", "npm:1.7.0"],\
+          ["zod", "npm:4.4.3"]\
+        ],\
+        "packagePeers": [\
+          "@langchain/core",\
+          "@langchain/langgraph",\
+          "@types/langchain__core",\
+          "@types/langchain__langgraph"\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["virtual:7f52074393eb362041f81494a585f80db87066308c18ade29c0af35a5cc29201b668578943377fb7a9c3ef0f455f6eaac18b06974c0e2b0e18281d51920c12ef#npm:1.1.3", {\
+        "packageLocation": "./.yarn/__virtual__/@langchain-mcp-adapters-virtual-eab0d2f440/0/cache/@langchain-mcp-adapters-npm-1.1.3-6d9d26fba9-804a18c173.zip/node_modules/@langchain/mcp-adapters/",\
+        "packageDependencies": [\
+          ["@langchain/core", "npm:1.1.48"],\
+          ["@langchain/langgraph", null],\
+          ["@langchain/mcp-adapters", "virtual:7f52074393eb362041f81494a585f80db87066308c18ade29c0af35a5cc29201b668578943377fb7a9c3ef0f455f6eaac18b06974c0e2b0e18281d51920c12ef#npm:1.1.3"],\
           ["@modelcontextprotocol/sdk", "virtual:2352920f688ebe378ddd7045c05b0a873745a2fc2d31b37fc537444b089266ea792b9fa3d435533ff027a40feafce1bfe777fb2bc396b168ea4319febf241f2e#npm:1.29.0"],\
           ["@types/langchain__core", null],\
           ["@types/langchain__langgraph", null],\
