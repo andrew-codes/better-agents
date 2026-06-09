@@ -37,7 +37,7 @@ The code review is written to `tmp/reviews/<PR-ID>-YYYY-MM-DD.md` (relative to t
 - **annotated** — the human's feedback is fed back to the code-reviewer sub-agent, which revises the review; the updated file is re-presented. This repeats (bounded) until approval or dismissal.
 - **dismissed** — the workflow stops; nothing is published.
 
-On approval, the approved review file is handed to the **pr-review-feedback-publisher** sub-agent, which reads it and posts the feedback to the PR using its configured provider, after which the file is deleted from disk.
+On approval, the approved review file is handed to the **pr-review-feedback-publisher** (a deterministic library, not an agent — there is no model in the posting path), which reads it and posts the feedback to the PR using its configured provider, after which the file is deleted from disk. GitHub feedback is posted via the GitHub MCP server; Bitbucket feedback is posted directly via the Bitbucket REST API (the official Rovo MCP server has no line-anchored inline-comment tool).
 
 ## Configuration
 
@@ -62,9 +62,9 @@ agents:
             github:
               token: ${GITHUB_TOKEN} # falls back to env GITHUB_TOKEN
             bitbucket:
-              username: ${BITBUCKET_USERNAME}
               workspace: ${BITBUCKET_WORKSPACE}
-              token: ${BITBUCKET_TOKEN}
+              email: ${BITBUCKET_EMAIL}
+              apiToken: ${BITBUCKET_API_TOKEN}
           codeReviewer:
             model:
               name: sonnet-4.6 # default model for the code-reviewer sub-agent
@@ -76,15 +76,14 @@ agents:
               - Call out security and performance risks.
             tone: Direct but collegial; concrete and actionable.
           feedbackPublisher:
-            model:
-              name: haiku-4.5 # default model for the feedback-publisher sub-agent
+            # No model: publishing is deterministic (no LLM in the posting path).
             gitProvider: github # github | bitbucket
             github:
               token: ${GITHUB_TOKEN} # falls back to env GITHUB_TOKEN
             bitbucket:
-              username: ${BITBUCKET_USERNAME}
               workspace: ${BITBUCKET_WORKSPACE}
-              token: ${BITBUCKET_TOKEN}
+              email: ${BITBUCKET_EMAIL}
+              apiToken: ${BITBUCKET_API_TOKEN}
 ```
 
 `plannotator` must be installed and on `PATH` (the agent shells out to `plannotator annotate <file> --json`).

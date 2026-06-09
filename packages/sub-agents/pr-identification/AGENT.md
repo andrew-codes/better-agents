@@ -18,9 +18,9 @@ Configured via `gitProvider` (`github` | `bitbucket`). The `GitProvider` / `Prov
 
 ### Bitbucket
 
-- MCP: [`bitbucket-mcp`](https://www.npmjs.com/package/bitbucket-mcp)
-- Auth: `BITBUCKET_USERNAME`, `BITBUCKET_WORKSPACE`, `BITBUCKET_TOKEN` (config.yml or env).
-- Allowlisted tools: `getPullRequests`, `getPullRequest`.
+- MCP: Atlassian's official [Rovo MCP server](https://support.atlassian.com/bitbucket-cloud/docs/interacting-with-bitbucket-via-mcp/) (remote; reached through the `mcp-remote` stdio proxy).
+- Auth: `BITBUCKET_WORKSPACE`, `BITBUCKET_EMAIL`, `BITBUCKET_API_TOKEN` (config.yml or env). The email + API token form a Basic `Authorization` header. The Rovo server's Bitbucket tools require API-token auth (OAuth is not yet available for them) and must be enabled by an org admin.
+- Allowlisted tools: `getPullRequests`, `getPullRequestDetails`.
 
 Bitbucket remote URLs encode `workspace/repo_slug` the same way GitHub encodes `owner/repo`, so the caller-supplied coordinates work for both providers.
 

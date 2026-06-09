@@ -10,9 +10,12 @@ interface GitProviderCredentials {
     token?: string;
   };
   bitbucket?: {
-    username?: string;
+    /** Falls back to the BITBUCKET_WORKSPACE env var when omitted. */
     workspace?: string;
-    token?: string;
+    /** Atlassian account email; falls back to the BITBUCKET_EMAIL env var. */
+    email?: string;
+    /** Atlassian API token; falls back to the BITBUCKET_API_TOKEN env var. */
+    apiToken?: string;
   };
 }
 

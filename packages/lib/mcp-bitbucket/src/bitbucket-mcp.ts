@@ -1,27 +1,36 @@
 import type { McpServerSpec } from "@andrew-codes/better-agents-pkg-mcp-utils";
 import type { BitbucketProviderConfig } from "./types.js";
 
+/** Atlassian's official remote MCP server (Rovo). Reached via the `mcp-remote` stdio proxy. */
+const ROVO_MCP_URL = "https://mcp.atlassian.com/v1/mcp";
+
 /**
- * Build the Bitbucket MCP server spec using the `bitbucket-mcp` package
- * (https://www.npmjs.com/package/bitbucket-mcp).
+ * Build the Bitbucket MCP server spec using Atlassian's **official** Rovo MCP
+ * server (https://support.atlassian.com/bitbucket-cloud/docs/interacting-with-bitbucket-via-mcp/).
  *
- * Credentials (username, workspace, token) come from config.yml or the
- * corresponding env vars and are passed through to the server subprocess.
+ * The Rovo server is remote, so it is launched through the `mcp-remote` stdio
+ * proxy — keeping the stdio `McpServerSpec` shape the rest of the system
+ * expects. Bitbucket Cloud tools authenticate with an Atlassian account email +
+ * API token passed as a Basic `Authorization` header (OAuth is not yet
+ * available for the Bitbucket tools; org admins must enable API-token auth on
+ * the Rovo server).
+ *
+ * Note: the Rovo server exposes no line-anchored inline-comment tool, so
+ * posting inline review comments is done directly against the Bitbucket REST
+ * API by the feedback publisher — not through this MCP server.
  *
  * The caller supplies `allowedTools` — what should be exposed depends on the
- * sub-agent's purpose (read-only metadata vs. posting feedback), not on the
- * provider itself.
+ * consumer's purpose (read-only metadata vs. posting), not on the provider.
  */
 function bitbucketMcp(config: BitbucketProviderConfig, allowedTools: string[]): McpServerSpec {
+  const basic = Buffer.from(`${config.email}:${config.apiToken}`).toString("base64");
   return {
     name: "bitbucket",
     command: "npx",
-    args: ["-y", "bitbucket-mcp"],
-    env: {
-      BITBUCKET_USERNAME: config.username,
-      BITBUCKET_WORKSPACE: config.workspace,
-      BITBUCKET_TOKEN: config.token,
-    },
+    // mcp-remote substitutes ${ENV_VAR} in header values from the child process env,
+    // keeping the credential out of argv (visible in ps/logs).
+    args: ["-y", "mcp-remote@0.1.38", ROVO_MCP_URL, "--header", "Authorization: Basic ${BITBUCKET_BASIC_AUTH}"],
+    env: { BITBUCKET_BASIC_AUTH: basic },
     allowedTools,
   };
 }

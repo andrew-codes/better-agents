@@ -1,11 +1,16 @@
 /**
  * Deterministic posting of a parsed review to a pull request.
  *
- * The MCP tools are invoked directly here (not via a model) so that the inline
- * comment placement and the request-changes verdict are guaranteed rather than
- * left to a model to assemble correctly.
+ * GitHub posting invokes the official MCP server's tools directly here (not via
+ * a model) so that inline comment placement and the request-changes verdict are
+ * guaranteed rather than left to a model to assemble correctly.
+ *
+ * Bitbucket posting goes straight to the Bitbucket Cloud REST API: the official
+ * Rovo MCP server exposes no line-anchored inline-comment tool, so the only way
+ * to anchor a comment to a file/line is the REST `inline` field.
  */
 import type { StructuredToolInterface } from "@langchain/core/tools";
+import type { BitbucketProviderConfig } from "@andrew-codes/better-agents-pkg-mcp-bitbucket";
 import type { Finding, ParsedReview } from "./parse.js";
 
 /** Result of a publish: a short human summary plus any created URL. */
@@ -169,48 +174,96 @@ async function publishToGitHub(
   throw new Error(`Failed to post GitHub review on PR #${target.number} after recovery attempts.`);
 }
 
+/** Shape of a Bitbucket PR comment request body (general or inline). */
+interface BitbucketCommentBody {
+  content: { raw: string };
+  /** Present for inline comments: anchors to the new-side (`to`) line of a file. */
+  inline?: { path: string; to: number };
+}
+
 /**
- * Post the review to a Bitbucket PR: the summary as a general comment, then each
- * located finding as its own inline comment. Bitbucket exposes no
- * request-changes verdict here, so a blocking outcome is stated in the summary
- * comment. Each comment is independent, so a single bad anchor only degrades
- * that one comment to a general comment.
+ * POST a comment to the Bitbucket Cloud REST API and return the raw JSON
+ * response text. Throws on any non-2xx so the caller's per-comment fallback can
+ * demote an un-anchorable inline comment to a general one.
+ */
+async function postBitbucketComment(
+  endpoint: string,
+  auth: string,
+  body: BitbucketCommentBody,
+): Promise<string> {
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: { authorization: auth, "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`Bitbucket REST ${res.status} ${res.statusText}: ${text}`);
+  }
+  return text;
+}
+
+/** Best-effort extraction of the human (html) comment URL from a Bitbucket response. */
+function extractBitbucketHtmlUrl(result: string): string | undefined {
+  try {
+    return (JSON.parse(result) as { links?: { html?: { href?: string } } })?.links?.html?.href;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Post the review to a Bitbucket PR via the REST API: the summary as a general
+ * comment, then each located finding as its own inline comment anchored to its
+ * file/line. Bitbucket exposes no request-changes verdict, so a blocking
+ * outcome is stated in the summary comment. Each comment is an independent
+ * request, so a single bad anchor only degrades that one comment to a general
+ * comment (the official Rovo MCP server has no inline-comment tool, hence REST).
  */
 async function publishToBitbucket(
-  tools: StructuredToolInterface[],
+  provider: BitbucketProviderConfig,
   target: { number: number; url: string },
   parsed: ParsedReview,
-  workspaceFallback: string,
 ): Promise<PublishResult> {
-  const commentTool = requireTool(tools, "addPullRequestComment");
+  if (!provider.email || !provider.apiToken) {
+    throw new Error("Missing Bitbucket credentials: both email and apiToken are required.");
+  }
   let workspace: string;
   let repo: string;
   try {
     ({ workspace, repo } = parseBitbucketCoords(target.url));
   } catch {
-    workspace = workspaceFallback;
+    workspace = provider.workspace;
     const m = /bitbucket\.org\/[^/]+\/([^/]+)/i.exec(target.url);
     if (!m) throw new Error(`Could not parse Bitbucket repo from PR URL: ${target.url}`);
     repo = m[1];
   }
-  const pull_request_id = String(target.number);
 
-  const base = { workspace, repo_slug: repo, pull_request_id };
+  const auth = `Basic ${Buffer.from(`${provider.email}:${provider.apiToken}`).toString("base64")}`;
+  const endpoint =
+    `https://api.bitbucket.org/2.0/repositories/${workspace}/${repo}` +
+    `/pullrequests/${target.number}/comments`;
+
   const summary = parsed.hasBlocking
     ? `**Requesting changes** — see the blocking findings below.\n\n${buildBody(parsed)}`
     : buildBody(parsed);
 
-  const summaryResult = await invokeTool(commentTool, { ...base, content: summary });
-  const summaryUrl = extractUrl(summaryResult);
+  const summaryResult = await postBitbucketComment(endpoint, auth, { content: { raw: summary } });
+  const summaryUrl = extractBitbucketHtmlUrl(summaryResult);
 
   let placed = 0;
   let demoted = 0;
   for (const f of parsed.findings) {
     try {
-      await invokeTool(commentTool, { ...base, content: f.body, inline: { path: f.path, to: f.line } });
+      await postBitbucketComment(endpoint, auth, {
+        content: { raw: f.body },
+        inline: { path: f.path, to: f.line },
+      });
       placed++;
     } catch {
-      await invokeTool(commentTool, { ...base, content: `\`${f.path}:${f.line}\` — ${f.body}` });
+      await postBitbucketComment(endpoint, auth, {
+        content: { raw: `\`${f.path}:${f.line}\` — ${f.body}` },
+      });
       demoted++;
     }
   }
