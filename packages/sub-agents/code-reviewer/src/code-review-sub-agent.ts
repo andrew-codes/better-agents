@@ -274,8 +274,12 @@ async function runPass(
   // Emit an immediate progress note plus periodic heartbeats until the first
   // chunk arrives so the user knows the review is still in progress.
   await onThought("\n↪ Reviewing…\n");
+  let heartbeatError: unknown;
   const heartbeat = setInterval(() => {
-    void onThought("…");
+    onThought("…")?.catch((err) => {
+      clearInterval(heartbeat);
+      heartbeatError = err instanceof Error ? err : new Error(String(err));
+    });
   }, 15_000);
 
   let review = "";
@@ -283,6 +287,7 @@ async function runPass(
     const stream = await model.stream(messages);
     for await (const chunk of stream) {
       clearInterval(heartbeat);
+      if (heartbeatError) throw heartbeatError;
       const { text, thinking } = splitChunk(chunk.content);
       if (thinking) await onThought(thinking);
       if (text) {
@@ -290,6 +295,7 @@ async function runPass(
         await onThought(text);
       }
     }
+    if (heartbeatError) throw heartbeatError;
   } finally {
     clearInterval(heartbeat);
   }
