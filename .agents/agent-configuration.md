@@ -24,10 +24,9 @@ agents:
             ENV_VAR: ${ENV_VAR_VALUE} # Bash-style variable substitution
           tools:
             - <tool-name> # Optional allowlist; omit to expose all tools
-      config:
-        <key>: <value> # Agent-specific options (vary by agent)
       env:
         ENV_VAR: ${ENV_VAR_VALUE} # Bash-style variable substitution
+      <key>: <value> # Agent-specific options (vary by agent)
 ```
 
 ## Model support
@@ -40,7 +39,7 @@ Environment variables defined under `env` are injected into the agent process at
 
 ## Agent-specific config
 
-Each agent may define its own configuration options under the `config` key. The shape of `config` is agent-defined — consult the individual agent's documentation for available keys. Unknown keys are ignored at runtime.
+Each agent may define its own additional configuration options directly alongside `model`, `mcpServers`, and `env`. The available keys are agent-defined — consult the individual agent's documentation. Unknown keys are ignored at runtime.
 
 ## MCP servers
 

@@ -37,19 +37,15 @@ interface SubAgentsConfig {
 }
 
 /**
- * Agent-specific config under the `config` key for `pr-reviewer`. Git provider
- * credentials are shared by the pr-identification and feedback-publisher
- * sub-agents, so they're configured once here rather than per-sub-agent.
+ * The full `pr-reviewer` entry parsed from the central config.yml. Git
+ * provider credentials are shared by the pr-identification and
+ * feedback-publisher sub-agents, so they're configured once here rather than
+ * per-sub-agent.
  */
-interface PrReviewerAgentConfig extends GitProviderCredentials {
+interface PrReviewerConfig extends GitProviderCredentials {
+  model?: ModelConfig;
+  env?: Record<string, string>;
   subAgents?: SubAgentsConfig;
 }
 
-/** The full `pr-reviewer` entry parsed from the central config.yml. */
-interface PrReviewerConfig {
-  model?: ModelConfig;
-  env?: Record<string, string>;
-  config?: PrReviewerAgentConfig;
-}
-
-export type { GitProviderCredentials, PrReviewerAgentConfig, PrReviewerConfig, SubAgentsConfig };
+export type { GitProviderCredentials, PrReviewerConfig, SubAgentsConfig };

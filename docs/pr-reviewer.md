@@ -31,37 +31,29 @@ agents:
         name: sonnet-4.6 # Overrides the default model; available for all agents/sub-agents.
       env:
         GITHUB_TOKEN: ${GITHUB_TOKEN}
-      config:
-        subAgents:
-          prIdentification:
-            gitProvider: github # github | bitbucket
-            github:
-              token: ${GITHUB_TOKEN} # falls back to env GITHUB_TOKEN
-            bitbucket:
-              workspace: ${BITBUCKET_WORKSPACE}
-              email: ${BITBUCKET_EMAIL}
-              apiToken: ${BITBUCKET_API_TOKEN}
-          codeReviewer:
-            # Principles the reviewer follows — a string or a list of strings,
-            # combined with its built-in review guidelines.
-            principles:
-              - Prefer clarity and correctness over cleverness.
-              - Flag missing tests and error handling.
-              - Call out security and performance risks.
-            # The voice the review is written in.
-            tone: Direct but collegial; concrete and actionable.
-          feedbackPublisher:
-            gitProvider: github # github | bitbucket
-            github:
-              token: ${GITHUB_TOKEN}
-            bitbucket:
-              workspace: ${BITBUCKET_WORKSPACE}
-              email: ${BITBUCKET_EMAIL}
-              apiToken: ${BITBUCKET_API_TOKEN}
+      # Git provider credentials, shared by the pr-identification sub-agent
+      # (PR lookup) and the pr-review-feedback-publisher (posting feedback).
+      gitProvider: github # github | bitbucket
+      github:
+        token: ${GITHUB_TOKEN} # falls back to env GITHUB_TOKEN
+      bitbucket:
+        workspace: ${BITBUCKET_WORKSPACE}
+        email: ${BITBUCKET_EMAIL}
+        apiToken: ${BITBUCKET_API_TOKEN}
+      subAgents:
+        codeReviewer:
+          # Principles the reviewer follows — a string or a list of strings,
+          # combined with its built-in review guidelines.
+          principles:
+            - Prefer clarity and correctness over cleverness.
+            - Flag missing tests and error handling.
+            - Call out security and performance risks.
+          # The voice the review is written in.
+          tone: Direct but collegial; concrete and actionable.
 ```
 
 A few things worth knowing:
 
-- **Provider credentials** can be set either directly in `config.yml` or via the corresponding environment variables (`GITHUB_TOKEN`, `BITBUCKET_WORKSPACE`, `BITBUCKET_EMAIL`, `BITBUCKET_API_TOKEN`). `gitProvider` controls which one the agent uses to look up the PR and to publish feedback — set it independently for lookup (`prIdentification`) and publishing (`feedbackPublisher`) if you ever need them to differ. Bitbucket auth uses an Atlassian account email + API token (Basic auth), used both for Atlassian's official Rovo MCP server (PR lookup) and the Bitbucket REST API (publishing inline comments).
+- **Provider credentials** can be set either directly in `config.yml` or via the corresponding environment variables (`GITHUB_TOKEN`, `BITBUCKET_WORKSPACE`, `BITBUCKET_EMAIL`, `BITBUCKET_API_TOKEN`). `gitProvider` controls which host the agent uses to look up the PR and to publish feedback. Bitbucket auth uses an Atlassian account email + API token (Basic auth), used both for Atlassian's official Rovo MCP server (PR lookup) and the Bitbucket REST API (publishing inline comments).
 - **`principles` and `tone`** are the main levers for shaping review quality — use them to match your team's standards and communication style.
 - **`model.name`** picks the model that powers the agent overall; nothing else needs to be configured to get started.

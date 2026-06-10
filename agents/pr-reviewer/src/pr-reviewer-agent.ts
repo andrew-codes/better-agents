@@ -140,8 +140,8 @@ interface PrReviewer {
  * no PR for the branch, or local commits that haven't been pushed.
  */
 async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
-  const subAgents = config.config?.subAgents;
-  const provider = resolveProvider(config.config);
+  const subAgents = config.subAgents;
+  const provider = resolveProvider(config);
 
   // The repository is always the current working directory.
   const gitSubAgent = await createGitSubAgent({
