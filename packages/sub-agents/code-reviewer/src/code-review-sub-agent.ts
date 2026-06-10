@@ -267,15 +267,31 @@ async function runPass(
   // With a thought sink, stream so the reviewer's progress is observable.
   // Reasoning deltas and answer deltas are both reported; only the answer
   // text is accumulated into the returned review.
+  //
+  // Reasoning models (e.g. OpenAI's o*/gpt-5 family) emit no content at all
+  // while "thinking" — the stream sits idle until the answer begins, which
+  // can take a while and otherwise looks indistinguishable from a hang.
+  // Emit an immediate progress note plus periodic heartbeats until the first
+  // chunk arrives so the user knows the review is still in progress.
+  await onThought("\n↪ Reviewing…\n");
+  const heartbeat = setInterval(() => {
+    void onThought("…");
+  }, 15_000);
+
   let review = "";
-  const stream = await model.stream(messages);
-  for await (const chunk of stream) {
-    const { text, thinking } = splitChunk(chunk.content);
-    if (thinking) await onThought(thinking);
-    if (text) {
-      review += text;
-      await onThought(text);
+  try {
+    const stream = await model.stream(messages);
+    for await (const chunk of stream) {
+      clearInterval(heartbeat);
+      const { text, thinking } = splitChunk(chunk.content);
+      if (thinking) await onThought(thinking);
+      if (text) {
+        review += text;
+        await onThought(text);
+      }
     }
+  } finally {
+    clearInterval(heartbeat);
   }
   return review.trim();
 }
