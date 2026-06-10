@@ -51,6 +51,15 @@ agents:
       env:
         GITHUB_TOKEN: ${GITHUB_TOKEN}
       config:
+        # Git provider credentials, shared by the pr-identification sub-agent
+        # (PR lookup) and the pr-review-feedback-publisher (posting feedback).
+        gitProvider: github # github | bitbucket
+        github:
+          token: ${GITHUB_TOKEN}
+        bitbucket:
+          workspace: ${BITBUCKET_WORKSPACE}
+          email: ${BITBUCKET_EMAIL}
+          apiToken: ${BITBUCKET_API_TOKEN}
         subAgents:
           git:
             model:
@@ -58,13 +67,6 @@ agents:
           prIdentification:
             model:
               name: haiku-4.5 # default model for the pr-identification sub-agent
-            gitProvider: github # github | bitbucket
-            github:
-              token: ${GITHUB_TOKEN} # falls back to env GITHUB_TOKEN
-            bitbucket:
-              workspace: ${BITBUCKET_WORKSPACE}
-              email: ${BITBUCKET_EMAIL}
-              apiToken: ${BITBUCKET_API_TOKEN}
           codeReviewer:
             model:
               name: sonnet-4.6 # default model for the code-reviewer sub-agent
@@ -75,17 +77,8 @@ agents:
               - Flag missing tests and error handling.
               - Call out security and performance risks.
             tone: Direct but collegial; concrete and actionable.
-          feedbackPublisher:
-            # No model: publishing is deterministic (no LLM in the posting path).
-            gitProvider: github # github | bitbucket
-            github:
-              token: ${GITHUB_TOKEN} # falls back to env GITHUB_TOKEN
-            bitbucket:
-              workspace: ${BITBUCKET_WORKSPACE}
-              email: ${BITBUCKET_EMAIL}
-              apiToken: ${BITBUCKET_API_TOKEN}
 ```
 
 `plannotator` must be installed and on `PATH` (the agent shells out to `plannotator annotate <file> --json`).
 
-Provider credentials may be supplied either in `config.yml` or via the corresponding environment variables.
+Provider credentials may be supplied either in `config.yml` or via the corresponding environment variables. The pr-review-feedback-publisher is a deterministic library, not an agent — there is no model in the posting path, and it uses the shared provider credentials above.

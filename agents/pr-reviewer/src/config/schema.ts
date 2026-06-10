@@ -24,7 +24,7 @@ interface SubAgentsConfig {
   git?: {
     model?: ModelConfig;
   };
-  prIdentification?: GitProviderCredentials & {
+  prIdentification?: {
     model?: ModelConfig;
   };
   codeReviewer?: {
@@ -34,13 +34,14 @@ interface SubAgentsConfig {
     /** Desired tone of the review feedback. */
     tone?: string;
   };
-  feedbackPublisher?: GitProviderCredentials & {
-    model?: ModelConfig;
-  };
 }
 
-/** Agent-specific config under the `config` key for `pr-reviewer`. */
-interface PrReviewerAgentConfig {
+/**
+ * Agent-specific config under the `config` key for `pr-reviewer`. Git provider
+ * credentials are shared by the pr-identification and feedback-publisher
+ * sub-agents, so they're configured once here rather than per-sub-agent.
+ */
+interface PrReviewerAgentConfig extends GitProviderCredentials {
   subAgents?: SubAgentsConfig;
 }
 

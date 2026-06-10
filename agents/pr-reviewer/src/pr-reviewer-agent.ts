@@ -141,6 +141,7 @@ interface PrReviewer {
  */
 async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
   const subAgents = config.config?.subAgents;
+  const provider = resolveProvider(config.config);
 
   // The repository is always the current working directory.
   const gitSubAgent = await createGitSubAgent({
@@ -149,7 +150,7 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
   });
 
   const prSubAgent: PrIdentificationSubAgent = await createPrIdentificationSubAgent({
-    provider: resolveProvider(subAgents?.prIdentification),
+    provider,
     model: resolveModel(subAgents?.prIdentification?.model),
   });
 
@@ -160,7 +161,7 @@ async function createPrReviewer(config: PrReviewerConfig): Promise<PrReviewer> {
   });
 
   const publisher: FeedbackPublisher = await createFeedbackPublisher({
-    provider: resolveProvider(subAgents?.feedbackPublisher),
+    provider,
     repoRoot: process.cwd(),
   });
 
