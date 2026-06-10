@@ -50,42 +50,34 @@ agents:
         name: sonnet-4.6
       env:
         GITHUB_TOKEN: ${GITHUB_TOKEN}
-      config:
-        subAgents:
-          git:
-            model:
-              name: haiku-4.5 # default model for the git sub-agent
-          prIdentification:
-            model:
-              name: haiku-4.5 # default model for the pr-identification sub-agent
-            gitProvider: github # github | bitbucket
-            github:
-              token: ${GITHUB_TOKEN} # falls back to env GITHUB_TOKEN
-            bitbucket:
-              workspace: ${BITBUCKET_WORKSPACE}
-              email: ${BITBUCKET_EMAIL}
-              apiToken: ${BITBUCKET_API_TOKEN}
-          codeReviewer:
-            model:
-              name: sonnet-4.6 # default model for the code-reviewer sub-agent
-            # Principles the reviewer follows — a string or a list. Combined
-            # with the sub-agent's base system prompt.
-            principles:
-              - Prefer clarity and correctness over cleverness.
-              - Flag missing tests and error handling.
-              - Call out security and performance risks.
-            tone: Direct but collegial; concrete and actionable.
-          feedbackPublisher:
-            # No model: publishing is deterministic (no LLM in the posting path).
-            gitProvider: github # github | bitbucket
-            github:
-              token: ${GITHUB_TOKEN} # falls back to env GITHUB_TOKEN
-            bitbucket:
-              workspace: ${BITBUCKET_WORKSPACE}
-              email: ${BITBUCKET_EMAIL}
-              apiToken: ${BITBUCKET_API_TOKEN}
+      # Git provider credentials, shared by the pr-identification sub-agent
+      # (PR lookup) and the pr-review-feedback-publisher (posting feedback).
+      gitProvider: github # github | bitbucket
+      github:
+        token: ${GITHUB_TOKEN}
+      bitbucket:
+        workspace: ${BITBUCKET_WORKSPACE}
+        email: ${BITBUCKET_EMAIL}
+        apiToken: ${BITBUCKET_API_TOKEN}
+      subAgents:
+        git:
+          model:
+            name: haiku-4.5 # default model for the git sub-agent
+        prIdentification:
+          model:
+            name: haiku-4.5 # default model for the pr-identification sub-agent
+        codeReviewer:
+          model:
+            name: sonnet-4.6 # default model for the code-reviewer sub-agent
+          # Principles the reviewer follows — a string or a list. Combined
+          # with the sub-agent's base system prompt.
+          principles:
+            - Prefer clarity and correctness over cleverness.
+            - Flag missing tests and error handling.
+            - Call out security and performance risks.
+          tone: Direct but collegial; concrete and actionable.
 ```
 
 `plannotator` must be installed and on `PATH` (the agent shells out to `plannotator annotate <file> --json`).
 
-Provider credentials may be supplied either in `config.yml` or via the corresponding environment variables.
+Provider credentials may be supplied either in `config.yml` or via the corresponding environment variables. The pr-review-feedback-publisher is a deterministic library, not an agent — there is no model in the posting path, and it uses the shared provider credentials above.

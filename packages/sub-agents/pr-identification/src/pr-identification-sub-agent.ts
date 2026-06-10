@@ -2,7 +2,7 @@ import type { BaseChatModel } from "@langchain/core/language_models/chat_models"
 import type { RunnableConfig } from "@langchain/core/runnables";
 import type { StructuredToolInterface } from "@langchain/core/tools";
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
-import { createAgent } from "langchain";
+import { createAgent, toolStrategy } from "langchain";
 import { bitbucketMcp } from "@andrew-codes/better-agents-pkg-mcp-bitbucket";
 import { githubMcp } from "@andrew-codes/better-agents-pkg-mcp-github";
 import { scopeTools, type McpServerSpec } from "@andrew-codes/better-agents-pkg-mcp-utils";
@@ -91,7 +91,13 @@ async function createPrIdentificationSubAgent(
     tools,
     // The plan mandates an empty system prompt for this sub-agent.
     systemPrompt: systemPrompt || undefined,
-    responseFormat: prDetailsSchema,
+    // Force structured output via a function-calling tool (strict: false)
+    // rather than the provider's native JSON-schema mode. The latter
+    // (auto-selected for OpenAI models that support it) defaults to
+    // strict: true, which gets applied to *all* bound tools — including the
+    // MCP server's tools, whose schemas don't satisfy OpenAI's strict
+    // requirements (e.g. optional properties missing from `required`).
+    responseFormat: toolStrategy(prDetailsSchema),
   });
 
   return {

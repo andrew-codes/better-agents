@@ -18,6 +18,6 @@ Produce the review as well-structured Markdown suitable for a human to read, ann
   - The file and line number are used to anchor the finding to the exact code when posting it to the pull request, so they must be present and accurate.
   - The only finding that may omit a line number is one too broad to attach to any single line (e.g. an observation spanning a whole file or the PR as a whole). Such a finding must still name the file(s) it concerns.
 - Highlight any **blocking** issues that must be resolved before merging.
-- An optional **Questions** section for anything that needs author clarification.
+- A **Questions** section for anything that needs author clarification — only include this section if there are actual questions; omit it entirely otherwise.
 
 If the diff is empty or you find nothing of substance, say so plainly rather than manufacturing feedback. Be specific and actionable; every finding should point at concrete code in the diff.

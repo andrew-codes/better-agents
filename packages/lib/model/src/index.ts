@@ -36,7 +36,10 @@ function resolveModel(config: ModelConfig | undefined): BaseChatModel | undefine
   // createThoughtCallback) get live output even from `.invoke()`. A `streaming`
   // key under `model` in config.yml overrides this.
   if (isOpenAi(name)) {
-    return new ChatOpenAI({ model: name, streaming: true, ...options });
+    // The Chat Completions API rejects function tools combined with
+    // `reasoning_effort` on reasoning models (e.g. gpt-5.x); the Responses
+    // API supports both, so use it unconditionally for OpenAI models.
+    return new ChatOpenAI({ model: name, streaming: true, useResponsesApi: true, ...options });
   }
 
   const model = ANTHROPIC_ALIASES[name] ?? name;
